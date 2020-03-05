@@ -1,0 +1,19 @@
+# python
+__pycache__/
+cogs/__pycache__/
+cogs/reddit/__pycache__/
+cogs/scrape/__pycache__/
+cogs/steam/__pycache__/
+cogs/helpers/__pycache__/
+
+# test file
+test.py
+cogs/playground_setup.py
+cogs/playground
+
+# config file
+config.cfg
+*.cfg
+
+.*/
+Pipfile

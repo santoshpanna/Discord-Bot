@@ -1,0 +1,25 @@
+[COMMON]
+logging = 
+playground = 
+
+[REDDIT]
+client.id = 
+client.secret = 
+user.agent = 
+user.password = 
+user.name = 
+
+[DATABASE]
+hostname = 
+port = 
+username = 
+password = 
+groupid = 
+publickey = 
+privatekey = 
+
+[DISCORD]
+token = 
+
+[STEAM]
+steam.api = 
