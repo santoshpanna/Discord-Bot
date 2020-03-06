@@ -56,7 +56,7 @@ class CrackWatch:
             post['created'] = common.getTimeFromTimestamp(submission.created)
             if submission.link_flair_text:
                 post['flair'] = submission.link_flair_text
-            if 'flair' in dict and 'release' in dict['flair'].lower() and 'daily' not in dict['flair'].lower():
+            if 'flair' in post and 'release' in post['flair'].lower() and 'daily' not in post['flair'].lower():
                 posts.appendleft(post)
 
         # go through new submissions
@@ -75,7 +75,7 @@ class CrackWatch:
                     description=description
                 )
 
-                links = re.findall(r"(?:http\:|https\:)?\/\/\S*\.(?:png|jpg)[A-Za-z0-9.\/\-\_\?\=\:]*", text)
+                links = re.findall(r"(?:http\:|https\:)?\/\/\S*\.(?:png|jpg)[A-Za-z0-9.\/\-\_\?\=\:]*", description)
 
                 if len(links) > 0:
                     embed.set_image(url=links[0])
