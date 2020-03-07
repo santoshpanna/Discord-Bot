@@ -12,10 +12,8 @@ class CSGO(commands.Cog):
     
     @commands.group(pass_context=True)
     async def csgo(self, ctx):
-        """
-            commands for csgo
-            if no sub commands is passed display the current no of searching players and players online instead
-        """
+        # commands for csgo
+        # if no sub commands is passed display the current no of searching players and players online instead
         if ctx.invoked_subcommand is None:
             if ctx.message.channel.name == 'lobby' or ctx.message.channel.name == 'csgo':
                 await server_status.serverStatus(ctx)
@@ -24,8 +22,8 @@ class CSGO(commands.Cog):
 
     @csgo.command(pass_context=True)
     async def register(self, ctx, username: str):
-        db = Database()
-        
+        # register member for csgo related services
+
         if ctx.message.channel.name == 'csgo':
             obj = Steam()
 

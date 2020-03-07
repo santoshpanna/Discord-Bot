@@ -1,5 +1,4 @@
-import os, discord
-from dotenv import load_dotenv
+import discord
 from discord.ext import commands
 from cogs.helpers import steam, guild, gamedeals
 from common import database, common

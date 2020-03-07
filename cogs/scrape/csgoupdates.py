@@ -11,8 +11,7 @@ class CsgoUpdates:
 
     async def run(self, bot):
         db = database.Database()
-        config = common.getConfig()
-        masterLogger = int(config['COMMON']['logging'])
+        masterLogger = common.getMasterLog()
 
         # csgo updates
         service = db.getService("csgoupdates")

@@ -11,8 +11,7 @@ class DestinyUpdates:
 
     async def run(self, bot):
         db = database.Database()
-        config = common.getConfig()
-        masterLogger = int(config['COMMON']['logging'])
+        masterLogger = common.getMasterLog()
 
         # destiny updates
         service = db.getService("destinyupdates")

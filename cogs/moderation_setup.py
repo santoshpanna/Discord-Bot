@@ -25,9 +25,9 @@ class Moderation(commands.Cog):
         async for message in self.bot.get_channel(ctx.message.channel.id).history(limit=number):
             await message.delete()
 
-        logChannel = guild.getChannel(ctx.message.guild.id)
+        logChannel = guild.getLogChannel(ctx.message.guild.id)
 
-        await self.bot.get_channel(logChannel["channel_id"]).send(f'{ctx.message.author.name} deleted {number} messages.')
+        await self.bot.get_channel(int(logChannel["channel_id"])).send(f'{ctx.message.author.name} deleted {number} messages.')
 
 
 def setup(bot):

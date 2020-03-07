@@ -9,8 +9,7 @@ def normalize(cog):
 class Core(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        config = common.getConfig()
-        self.log = config['COMMON']['logging']
+        self.masterLogger = common.getMasterLog()
 
     @commands.command(name='load', hidden=True)
     @commands.is_owner()

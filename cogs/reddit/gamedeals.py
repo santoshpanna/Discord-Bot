@@ -1,7 +1,6 @@
 import praw, os, discord, requests
-from steamstorefront import SteamStoreFront
+from steamstorefront import SteamStoreFront, InvalidArgument
 from datetime import datetime
-from dotenv import load_dotenv
 from collections import deque
 from bs4 import BeautifulSoup
 from common import common, database
@@ -17,8 +16,7 @@ class GameDeals:
     def __init__(self):
         config = common.getConfig()
         self.masterLogger = int(config['COMMON']['logging'])
-        self.r = praw.Reddit(client_id=config['REDDIT']['client.id'], client_secret=config['REDDIT']['client.secret'],
-                             user_agent=config['REDDIT']['user.agent'])
+        self.r = praw.Reddit(client_id=config['REDDIT']['client.id'], client_secret=config['REDDIT']['client.secret'], user_agent=config['REDDIT']['user.agent'])
         self.steam = steam.Steam()
         self.ssf = SteamStoreFront()
 
@@ -35,8 +33,7 @@ class GameDeals:
         return True
 
     async def run(self, bot):
-        config = common.getConfig()
-        masterLogger = int(config['COMMON']['logging'])
+        masterLogger = common.getMasterLog()
         db = database.Database()
 
         # subreddits to fetch
@@ -83,7 +80,12 @@ class GameDeals:
                     if 'url' in deal and deal['url']:
                         # check if its steam store link
                         if 'steampowered.com' in deal['url']:
-                            price = self.ssf.getPrice(url=deal['url'])
+                            try:
+                                price = self.ssf.getPrice(url=deal['url'])
+                            except InvalidArgument as e:
+                                if common.getEnvironment() == 'prod' or common.getEnvironment() == 'dev':
+                                    await bot.get_channel(masterLogger).send(f"error getting price for {deal['url']} of reddit id {deal['id']}. Arguments passed {e.error}, error type {e.type}.")
+                                pass
                             if price:
                                 deal['price'] = price['final']
                         if self.keyDoesNotExists(enriched_post, deal):
@@ -117,15 +119,21 @@ class GameDeals:
                 if status == 1:
                     # price check for steam games
                     if 'steampowered.com' in post['url']:
-                        existingDeal = db.getDeal(post)
-                        newprice = self.ssf.getPrice(url=post['url'])['final']
-                        if 'price' in existingDeal:
-                            oldprice = existingDeal['price']
-                            # if new price is less than older price post the deal
-                            if int(newprice) < int(oldprice):
-                                await self.steam.post(bot, channel, post)
-                        else:
-                            await self.steam.post(bot, channel, post)
+                        try:
+                            existingDeal = db.getDeal(post)
+                            newprice = self.ssf.getPrice(url=post['url'])['final']
+                            if 'price' in existingDeal:
+                                oldprice = existingDeal['price']
+                                # if new price is less than older price post the deal
+                                if int(newprice) < int(oldprice):
+                                    await self.steam.post(bot, channel, post)
+                        # can't compare price, so leave the deal
+                        except InvalidArgument as e:
+                            if common.getEnvironment() == 'prod' or common.getEnvironment() == 'dev':
+                                await bot.get_channel(common.getMasterLog()).send(f"error getting price for {post['url']} of reddit id {post['id']}. Arguments passed {e.error}, error type {e.type}.")
+                            pass
+                    # else:
+                    #     await self.steam.post(bot, channel, post)
 
                 # the deal is a new one
                 elif status == 2:

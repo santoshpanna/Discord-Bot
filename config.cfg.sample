@@ -1,6 +1,5 @@
 [COMMON]
-logging = 
-playground = 
+environment = prod | dev
 
 [REDDIT]
 client.id = 

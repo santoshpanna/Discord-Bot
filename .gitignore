@@ -17,3 +17,8 @@ config.cfg
 
 .*/
 Pipfile
+
+# virtual env
+Lib/*
+Scripts/*
+Include/*

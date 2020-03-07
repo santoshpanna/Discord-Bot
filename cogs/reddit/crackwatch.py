@@ -1,4 +1,4 @@
-import praw, os, asyncio, discord
+import praw, re, asyncio, discord
 from collections import deque
 from cogs.helpers import guild
 from common import database, common
@@ -20,8 +20,7 @@ class CrackWatch:
 
     # get latest crack release
     async def run(self, bot):
-        config = common.getConfig()
-        masterLogger = int(config['COMMON']['logging'])
+        masterLogger = common.getMasterLog()
         db = database.Database()
 
         # r/CrackWatch

@@ -12,22 +12,17 @@ class Status(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        config = common.getConfig()
-        self.masterLog = int(config['COMMON']['logging'])
+        self.masterLog = common.getMasterLog()
     
     @commands.group(pass_context=True)
     async def status(self, ctx):
-        """
-            command to get or set the varius statues, depeneding on the subcommand
-        """
+        # command to get or set the varius statues, depeneding on the subcommand
         if ctx.invoked_subcommand is None:
             await ctx.send(f'Hello {ctx.author}.')
 
     @status.command(pass_context=True)
     async def server(self, ctx):
-        """
-            subcommand to get the server status
-        """
+        # subcommand to get the server status
         embed = discord.Embed(
             title = 'Server Information'
         )
@@ -65,18 +60,14 @@ class Status(commands.Cog):
     @status.command(pass_context=True)
     @commands.is_owner()
     async def set(self, ctx, status: str):
-        """
-            subcommand to set the current bot status
-        """
+        # subcommand to set the current bot status
         await self.bot.change_presence(status=discord.Status.idle, activity=discord.CustomActivity(name=status))
         await self.bot.get_channel(self.masterLog).send(f"changed status to {status}")
 
     @status.command(pass_context=True)
     async def csgo(self, ctx):
-        """
-            commands for csgo
-            if no sub commands is passed display the current no of searching players and players online instead
-        """
+        # commands for csgo
+        # if no sub commands is passed display the current no of searching players and players online instead
         if ctx.message.channel.name == 'lobby' or ctx.message.channel.name == 'csgo':
             await server_status.serverStatus(ctx)
         else:
