@@ -38,12 +38,14 @@ class Steam:
                 description = obj.getDescription(short=True)
             elif category == 'sub':
                 items = obj.getApps()
-                for item in items:
-                    description = description + "[{}]({})\n".format(item["name"], 'https://store.steampowered.com/app/'+item['id'])
+                if items:
+                    for item in items:
+                        description = description + "[{}]({})\n".format(item["name"], 'https://store.steampowered.com/app/'+item['id'])
             else:
                 items = obj.getPackageItem()
-                for item in items:
-                    description = description + "[{}]({})".format(item["name"], item['app_link'])
+                if items:
+                    for item in items:
+                        description = description + "[{}]({})".format(item["name"], item['app_link'])
 
             # discord embed description limit
             if len(description) >= 2048:

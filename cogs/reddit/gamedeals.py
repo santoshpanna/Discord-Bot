@@ -1,5 +1,5 @@
 import praw, os, discord, requests
-from steamstorefront import SteamStoreFront, InvalidArgument
+from steamstorefront import SteamStoreFront
 from datetime import datetime
 from collections import deque
 from bs4 import BeautifulSoup
@@ -15,7 +15,7 @@ class GameDeals:
     # constructor to initialize varialbles
     def __init__(self):
         config = common.getConfig()
-        self.masterLogger = int(config['COMMON']['logging'])
+        self.masterLogger = common.getMasterLog()
         self.r = praw.Reddit(client_id=config['REDDIT']['client.id'], client_secret=config['REDDIT']['client.secret'], user_agent=config['REDDIT']['user.agent'])
         self.steam = steam.Steam()
         self.ssf = SteamStoreFront()

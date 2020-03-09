@@ -40,10 +40,10 @@ class Core(commands.Cog):
             self.bot.unload_extension(normalize(cog))
             self.bot.load_extension(normalize(cog))
         except Exception as e:
-            await self.bot.get_channel(self.masterLogger).send(f'** ERROR loading {cog}: ** {type(e).__name__}')
+            await self.bot.get_channel(self.masterLogger).send(f'** ERROR reloading {cog}: ** {type(e).__name__}')
         else:
-            await ctx.send(f'** Loaded: ** {cog}')
-            await self.bot.get_channel(self.masterLogger).send(f'** Loaded: ** {cog}')
+            await ctx.send(f'** Reloaded: ** {cog}')
+            await self.bot.get_channel(self.masterLogger).send(f'** Reloaded: ** {cog}')
 
 
 def setup(bot):

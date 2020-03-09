@@ -8,8 +8,7 @@ class Moderation(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        config = common.getConfig()
-        self.masterLog = int(config['COMMON']['logging'])
+        self.masterLog = common.getMasterLog()
 
     @commands.group(pass_context=True)
     @commands.has_permissions(manage_messages=True)

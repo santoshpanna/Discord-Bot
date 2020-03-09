@@ -62,9 +62,6 @@ class DestinyUpdates:
                 delta = timedelta(hours=int(posts['date']))
                 posts['date'] = str(datetime.strftime((datetime.today() - delta), "%b %d, %Y"))
 
-            if posts['date'] == service["latest"]:
-                break
-
             posts['patchnotes'] = str(detail_soup.find("div", attrs={"class":"content text-content"}))
 
             # removing tags
@@ -87,7 +84,11 @@ class DestinyUpdates:
             if len(posts['patchnotes']) >= 2048:
                 posts['patchnotes'] = posts['patchnotes'][:2040]+"\n..."
 
-            updates.append(posts)
+            # check if the there are any new updates
+            if posts['date'] == service["latest"]:
+                break
+            else:
+                updates.append(posts)
 
         # returns list in ascending order
         for update in updates[::-1]:

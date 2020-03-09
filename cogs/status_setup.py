@@ -16,7 +16,7 @@ class Status(commands.Cog):
     
     @commands.group(pass_context=True)
     async def status(self, ctx):
-        # command to get or set the varius statues, depeneding on the subcommand
+        # command to get or set the varius statues, depeneding on the subcomman`d
         if ctx.invoked_subcommand is None:
             await ctx.send(f'Hello {ctx.author}.')
 
@@ -48,8 +48,9 @@ class Status(commands.Cog):
         else:
             res = res.json()
             string = f"{res['totalCount']} | ["
+            temp = ""
             for process in res['results'][::-1]:
-                temp = string + f"{process['typeName'].replace('REPLICA_', '')} | "
+                temp = temp + f"{process['typeName'].replace('REPLICA_', '')} | "
             # remove "| "
             temp = temp[:-2]
             string = string + temp + ']'

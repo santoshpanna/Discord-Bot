@@ -11,7 +11,9 @@ steamlinks = ('steampowered.com/app', 'steampowered.com/bundle', 'steampowered.c
 def removeURI(url):
     position = url.find('?')
     if position > 0:
-        return url[:position]
+        url = url[:position]
+    if url.endswith('/'):
+        return url[:-1]
     return url
 
 
@@ -57,9 +59,8 @@ def getStoreLink(submission):
 
 async def cleaner(bot):
     db = database.Database()
-    config = common.getConfig()
-    masterlog = config['COMMON']['logging']
-    masterlog = bot.get_channel(int(masterlog))
+    masterlog = common.getMasterLog()
+    masterlog = bot.get_channel(masterlog)
 
     await masterlog.send(f"purging old deals from gamedeals.")
 

@@ -47,5 +47,5 @@ def getEnvironment():
 # used to track status of cogs in dev server
 # for normal bot logging use logging service
 def getMasterLog():
-    config = getConfig
+    config = getConfig()
     return int(config['COMMON']['masterlog'])

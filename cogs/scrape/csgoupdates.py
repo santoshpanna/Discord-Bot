@@ -59,11 +59,12 @@ class CsgoUpdates:
             if len(posts['patchnotes']) >= 2048:
                 posts['patchnotes'] = posts['patchnotes'][:2040]+"\n..."
 
+            # check if the there are any new updates
             if posts['date'] == service["latest"]:
                 break
-
-            # append data
-            updates.append(posts)
+            else:
+                # append data
+                updates.append(posts)
 
         # process list in ascending order
         for update in updates[::-1]:
