@@ -80,6 +80,7 @@ class GameDeals:
                     if 'url' in deal and deal['url']:
                         # check if its steam store link
                         if 'steampowered.com' in deal['url']:
+                            price = None
                             try:
                                 price = self.ssf.getPrice(url=deal['url'])
                             except InvalidArgument as e:
