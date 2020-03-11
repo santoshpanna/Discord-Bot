@@ -9,11 +9,13 @@ class Reddit(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.job.start()
+        self.gamedeals.start()
+        self.crackwatch.start()
         self.cleaner.start()
 
     def cog_unload(self):
-        self.job.cancel()
+        self.gamedeals.cancel()
+        self.crackwatch.start()
         self.cleaner.cancel()
 
     # 1 month, like bots gonna run continously for 1 month straight
@@ -26,14 +28,17 @@ class Reddit(commands.Cog):
         await gamedeals.cleaner(self.bot)
 
     @tasks.loop(minutes = 30.0)
-    async def job(self):     
-        # r/CrackWatch
-        cw = CrackWatch()
-        await cw.run(self.bot)
-        
+    async def gamedeals(self):            
         # r/SteamDeals r/gamedeals r/Freegamefindings
         gd = GameDeals()
         await gd.run(self.bot)
+
+    @tasks.loop(minutes = 60.0)
+    async def crackwatch(self):
+        # r/CrackWatch
+        cw = CrackWatch()
+        await cw.run(self.bot)
+
 
 def setup(bot):
     bot.add_cog(Reddit(bot))

@@ -40,7 +40,7 @@ class Steam:
                 items = obj.getApps()
                 if items:
                     for item in items:
-                        description = description + "[{}]({})\n".format(item["name"], 'https://store.steampowered.com/app/'+item['id'])
+                        description = description + "[{}]({})\n".format(item["name"], 'https://store.steampowered.com/app/'+str(item['id']))
             else:
                 items = obj.getPackageItem()
                 if items:

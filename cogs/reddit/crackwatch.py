@@ -18,6 +18,18 @@ class CrackWatch:
         res = rsub.new(limit = limit)
         return res
 
+    def crackHead(self, flair):
+        if not flair:
+            return True
+
+        reject = ['discussion', 'daily', 'humor']
+        flag = True
+        for bad in reject:
+            if bad in flair.lower():
+                flag = False
+        return flag
+
+
     # get latest crack release
     async def run(self, bot):
         masterLogger = common.getMasterLog()
@@ -53,9 +65,8 @@ class CrackWatch:
             post['url'] = submission.url
             post['selftext'] = submission.selftext
             post['created'] = common.getTimeFromTimestamp(submission.created)
-            if submission.link_flair_text:
+            if self.crackHead(submission.link_flair_text):
                 post['flair'] = submission.link_flair_text
-            if 'flair' in post and 'release' in post['flair'].lower() and 'daily' not in post['flair'].lower():
                 posts.appendleft(post)
 
         # go through new submissions
@@ -125,6 +136,9 @@ class CrackWatch:
 
                 # sleep for 1 second
                 await asyncio.sleep(1)
+
+            if not posts[i]['flair']:
+                await bot.get_channel(masterLogger).send(f"**error:** check {posts[i]['url']}.")
 
         # update database
         data = {}

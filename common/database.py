@@ -9,30 +9,7 @@ class Database:
     def __init__(self):
         # getting the configuration
         config = common.getConfig()
-        hostname = config['DATABASE']['hostname']
-        port = config['DATABASE']['port']
-        # username and password
-        userpass = ''
-        if config.has_option('DATABASE', 'username') and config.has_option('DATABASE', 'password'):
-            userpass += config['DATABASE']['username'] + ':' + config['DATABASE']['password'] + '@'
-        # authsource and ssl
-        authsource = None
-        ssl = None
-        if config.has_option('DATABASE', 'authsource'):
-            authsource = config['DATABASE']['authsource']
-        if config.has_option('DATABASE', 'ssl'):
-            ssl = config['DATABASE']['ssl']
-
-        uri = ''
-        if authsource:
-            uri += '/?authsource=' + authsource
-            if ssl:
-                uri += "&ssl=" + ssl
-        elif ssl:
-            uri += "/?ssl=" + ssl
-
-        client = MongoClient('mongodb+srv://' + userpass + hostname + uri)
-
+        client = MongoClient(config['DATABASE']['uri'])
         self.db = client.discordbot
 
     # services
@@ -121,6 +98,7 @@ class Database:
         exists = self.db.gamedeals.find_one({'url': deal['url']})
 
         if exists:
+            deal['updated_at'] = common.getDatetimeIST()
             status = self.db.gamedeals.update_one(
                 {'_id': exists['_id']},
                 {'$set': deal}
@@ -128,16 +106,15 @@ class Database:
 
             if status:
                 return 1
-            else:
-                return -1
 
         else:
+            deal['created_at'] = common.getDatetimeIST()
             status = self.db.gamedeals.insert_one(deal).acknowledged
 
             if status:
                 return 2
-            else:
-                return -1
+
+        return -1
 
     def checkGetDeal(self, deal):
         exists = self.db.gamedeals.find_one({'url': deal['url']})

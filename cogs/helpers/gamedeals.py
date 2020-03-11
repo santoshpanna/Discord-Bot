@@ -50,7 +50,7 @@ def isFromAcceptableStore(submission):
 
 # get store link from subtext
 def getStoreLink(submission):
-    links = re.findall(r'https?://[^\s<>"]+|www\.[^\s<>"]+', submission.selftext)
+    links = re.findall(r'https?://[^\s<>")]+|www\.[^\s<>")]+', submission.selftext)
 
     for link in links:
         if isFromAcceptableStore(link):
