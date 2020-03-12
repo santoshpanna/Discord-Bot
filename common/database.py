@@ -28,6 +28,9 @@ class Database:
             {'$set': data}
         ).acknowledged
 
+    def getChannelByService(self, query):
+        return self.db.guild_channel_mapping.find_one(query)
+
     def insertService(self, service):
         # insert a module
         obj = self.db.services.find_one({"name": service["name"]})
@@ -86,6 +89,56 @@ class Database:
         # if its a new guild simply insert
         else:
             return self.db.guilds.insert_one(data).acknowledged
+
+    def createChannelMapping(self, data):
+        # get the service
+        service = self.db.services.find_one({'name': data['service_name']})
+
+        # get the channel mapping
+        mapping = self.db.guild_channel_mapping.find_one({'guild_id': data['guild_id'], 'channel_id': data['channel_id']})
+
+        # there exists no mapping for current channel
+        if not mapping:
+            insert = {}
+            insert['guild_id'] = data['guild_id']
+            insert['channel_id'] = data['channel_id']
+            insert['channel_name'] = data['channel_name']
+            insert['service_ids'] = []
+            insert['service_ids'].append(str(service['_id']))
+            if self.db.guild_channel_mapping.insert_one(insert).acknowledged:
+                return 1
+        else:
+            if str(service['_id']) in mapping['service_ids']:
+                return 2
+            else:
+                update = {}
+                update['service_ids'] = mapping['service_ids']
+                update['service_ids'].append(str(service['_id']))
+                if self.db.guild_channel_mapping.update_one({'_id': mapping['_id']}, {'$set': update}).acknowledged:
+                    return 1
+        return -1
+
+    def deleteChannelMapping(self, data):
+        # get the service
+        service = self.db.services.find_one({'name': data['service_name']})
+
+        # get the channel mapping
+        mapping = self.db.guild_channel_mapping.find_one({'guild_id': data['guild_id'], 'channel_id': data['channel_id'], 'service_ids': str(service['_id'])})
+
+        # there exists no mapping for current channel
+        if not mapping:
+            return 2
+        else:
+            if len(mapping['service_ids']) == 1:
+                if self.db.guild_channel_mapping.delete_one({'guild_id': mapping['guild_id'], 'channel_id': mapping['channel_id']}).deleted_count == 1:
+                    return 1
+            else:
+                update = {}
+                update['service_ids'] = mapping['service_ids']
+                update['service_ids'].remove(str(service['_id']))
+                if self.db.guild_channel_mapping.update_one({'_id': mapping['_id']}, {'$set': update}).acknowledged:
+                    return 1
+        return -1
 
     # Game deals
     def getDeal(self, deal):

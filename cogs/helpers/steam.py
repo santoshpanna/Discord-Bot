@@ -100,9 +100,9 @@ class Steam:
             embed.set_footer(text=str(datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")))
 
             # send the message
-            await bot.get_channel(int(channel["channel_id"])).send(embed=embed)
+            await bot.get_channel(channel["channel_id"]).send(embed=embed)
             if "logging" in channel:
-                await bot.get_channel(int(channel["logging"])).send(f"sent {obj.getName()} in {channel['channel_name']}")
+                await bot.get_channel(channel["logging"]).send(f"sent {obj.getName()} in {channel['channel_name']}")
 
             # sleep for 1 sec
             await asyncio.sleep(1)
@@ -139,8 +139,7 @@ class Steam:
             status = db.insertUserSteam('steam', obj)
             if not status:
                 await ctx.send(f"{ctx.message.author}, registration unsuccessful. This is internal error.")
-                config = common.getConfig()
-                masterLog = config['COMMON']['logging']
-                bot.get_channel(int(masterLog)).send(f"Unable to insert csgo user {username} requested from user {ctx.message.author}.")
+                masterLog = common.getMasterLog()
+                bot.get_channel(masterLog).send(f"Unable to insert csgo user {username} requested from user {ctx.message.author}.")
             else:
                 await ctx.send(f"{ctx.message.author}, registration successful.")

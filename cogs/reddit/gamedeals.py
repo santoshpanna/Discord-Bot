@@ -142,10 +142,10 @@ class GameDeals:
                     if 'steampowered.com' in post['url']:
                         await self.steam.post(bot, channel, post)
                     else:
-                        await bot.get_channel(int(channel['channel_id'])).send(post['url'])
+                        await bot.get_channel(channel['channel_id']).send(post['url'])
                         # if logging is enabled post log
                         if 'logging' in channel:
-                            await bot.get_channel(int(channel['logging'])).send(f"sent {post['title']} in {channel['channel_name']}")
+                            await bot.get_channel(channel['logging']).send(f"sent {post['title']} in {channel['channel_name']}")
 
                 # there has been error updating or inserting deal
                 else:

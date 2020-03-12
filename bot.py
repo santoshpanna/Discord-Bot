@@ -17,7 +17,9 @@ modules = [
     'cogs.moderation_setup',
     'cogs.csgo_setup',
     'cogs.scrape_setup',
-    'cogs.reddit_setup'
+    'cogs.reddit_setup',
+    'cogs.services_setup',
+    'cogs.send_setup'
 ]
 
 
@@ -37,4 +39,5 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.CustomActivity(name='Testing mode >.<'))
 
 
+bot.remove_command('help')
 bot.run(token)

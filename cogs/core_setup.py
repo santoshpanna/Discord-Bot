@@ -1,4 +1,6 @@
 from discord.ext import commands
+import discord
+from .helpers import guild
 from common import common
 
 
@@ -10,6 +12,34 @@ class Core(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.masterLogger = common.getMasterLog()
+
+    @commands.group(pass_context=True)
+    async def help(self, ctx):
+        if ctx.invoked_subcommand is None:
+            description = 'To invoke a command use `!<command>`\n'
+            description = description + 'To view subcommands use `!<command> help`\n'
+            description = description + 'Available commands are : \n'
+            description = description + '**service** - to view available service\n'
+            description = description + '**status** - to view available service\n'
+            description = description + '**mod** - mod commands\n'
+            description = description + '\n'
+            description = description + f'`{"!help service" : <20} - to view available services`'
+            embed = discord.Embed(title='Help', description=description)
+            await ctx.send(embed=embed)
+
+    @help.command(pass_context=True)
+    async def service(self, ctx):
+        description = 'To subscribe to a service type `!service init <servicename>`\n'
+        description = description + 'To unsubscribe to a service type `!service deinit <servicename>`\n'
+        description = description + 'Available services are : \n'
+        servicelist = common.getServiceList()
+        for service in servicelist:
+            description = description + f'**{service : <30}** - {servicelist[service]}\n'
+        description = description + '\n'
+        description = description + 'Type the ***init*** and ***deinit*** command in channel you want to subscribe service in.'
+        description = description + ' Multiple service can be subscribed to in one channel.'
+        embed = discord.Embed(title='Service List', description=description)
+        await ctx.send(embed=embed)
 
     @commands.command(name='load', hidden=True)
     @commands.is_owner()

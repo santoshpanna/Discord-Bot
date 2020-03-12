@@ -93,30 +93,13 @@ def updateGuidInfo(guild):
     data = {}
     data["name"] = guild.name
     data["region"] = guild.region.name
-    data["icon"] = guild.icon
     data["id"] = guild.id
     data["afk_channel "] = getChannel(guild.afk_channel)
     data["owner"] = getMember(guild.owner)
-    data["unavailable"] = guild.unavailable
     data["description"] = guild.description
     data["default_notifications"] = guild.default_notifications.name
-    data["features"] = guild.features
-    data["splash"] = guild.splash
-    data["premium_tier"] = guild.premium_tier
     data["premium_subscription_count"] = guild.premium_subscription_count
-    try:
-        data["preferred_locale"] = guild.preferred_locale
-    except AttributeError:
-        pass
-    data["channels"] = getChannelsList(guild.channels)
     data["large"] = guild.large
-    data["text_channels"] = getChannelsList(guild.text_channels)
-    data["categories"] = getCategoryChannels(guild.categories)
-    data["system_channel"] = getChannel(guild.system_channel)
-    data["members"] = getMembers(guild.members)
-    data["voice_channels"] = getChannelsList(guild.voice_channels)
-    data["premium_subscribers"] = getMembers(guild.premium_subscribers)
-    data["roles"] = getRoles(guild.roles)
     data["member_count"] = guild.member_count
     data["created_at"] = guild.created_at
     db = Database()
@@ -126,7 +109,7 @@ def updateGuidInfo(guild):
 def getLogChannel(guildid):
     db = Database()
     query = {}
-    query["guild_id"] = str(guildid)
+    query["guild_id"] = guildid
     service = db.getService("logging")
     query["service_ids"] = str(service["_id"])
     return db.getChannelByService(query)
@@ -148,7 +131,7 @@ def getChannels(servicename):
             service = db.getService(servicename)
             # form search query
             query = {}
-            query["guild_id"] = str(guild["id"])
+            query["guild_id"] = guild["id"]
             query["service_ids"] = str(service["_id"])
             gcs = db.getChannelsByService(query)
 
@@ -162,3 +145,11 @@ def getChannels(servicename):
                 channels.append(channel)
 
     return channels
+
+def getChannelByGuild(guildid, servicename):
+    db = Database()
+    query = {}
+    query["guild_id"] = str(guildid)
+    service = db.getService(servicename)
+    query["service_ids"] = str(service["_id"])
+    return db.getChannelByService(query)

@@ -49,3 +49,14 @@ def getEnvironment():
 def getMasterLog():
     config = getConfig()
     return int(config['COMMON']['masterlog'])
+
+
+def getServiceList():
+    service = {}
+    service['csgoupdates'] = 'CSGO update news'
+    service['destinyupdates'] = 'Destiny 2 update news'
+    service['crackwatch'] = 'Game crack news'
+    service['repacknews'] = 'Game repack news'
+    service['gamedeals'] = 'Game deal news'
+    service['logging'] = 'Logging service for your guild'
+    return service

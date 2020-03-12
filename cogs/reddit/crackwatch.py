@@ -29,7 +29,6 @@ class CrackWatch:
                 flag = False
         return flag
 
-
     # get latest crack release
     async def run(self, bot):
         masterLogger = common.getMasterLog()
@@ -71,8 +70,11 @@ class CrackWatch:
 
         # go through new submissions
         for i in range(len(posts)):
+            if not posts[i]['flair']:
+                await bot.get_channel(masterLogger).send(f"**error:** check {posts[i]['url']}.")
+
             # check for release flair
-            if posts[i]['flair'].lower() == "release":
+            elif posts[i]['flair'].lower() == "release":
                 description = posts[i]['selftext']
 
                 # discord embed description limit
@@ -101,16 +103,16 @@ class CrackWatch:
                 # send message
                 channels = guild.getChannels("crackwatch")
                 for channel in channels: 
-                    await bot.get_channel(int(channel["channel_id"])).send(embed=embed)
+                    await bot.get_channel(channel["channel_id"]).send(embed=embed)
                     # if logging is enabled post log
                     if "logging" in channel:
-                        await bot.get_channel(int(channel["logging"])).send(f"sent {posts[i]['title']} in {channel['channel_name']}")
+                        await bot.get_channel(channel["logging"]).send(f"sent {posts[i]['title']} in {channel['channel_name']}")
 
                 # sleep for 1 sec
                 await asyncio.sleep(1)
 
             # check for repack flair
-            if "repack" in posts[i]['flair'].lower():
+            elif "repack" in posts[i]['flair'].lower():
                 embed = discord.Embed(
                     title=posts[i]['title'],
                     url=posts[i]['url'],
@@ -129,16 +131,13 @@ class CrackWatch:
                 # send message
                 channels = guild.getChannels("repacknews")
                 for channel in channels: 
-                    await bot.get_channel(int(channel["channel_id"])).send(embed=embed)
+                    await bot.get_channel(channel["channel_id"]).send(embed=embed)
                     # if logging is enabled post log
                     if "logging" in channel:
-                        await bot.get_channel(int(channel["logging"])).send(f"sent {posts[i]['title']} in {channel['channel_name']}")
+                        await bot.get_channel(channel["logging"]).send(f"sent {posts[i]['title']} in {channel['channel_name']}")
 
                 # sleep for 1 second
                 await asyncio.sleep(1)
-
-            if not posts[i]['flair']:
-                await bot.get_channel(masterLogger).send(f"**error:** check {posts[i]['url']}.")
 
         # update database
         data = {}

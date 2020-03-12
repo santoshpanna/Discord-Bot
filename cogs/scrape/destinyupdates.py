@@ -88,6 +88,7 @@ class DestinyUpdates:
             if posts['date'] == service["latest"]:
                 break
             else:
+                await bot.get_channel(masterLogger).send(f'**from d2** : latest = {service["latest"]} id = {posts["date"]}')
                 updates.append(posts)
 
         # returns list in ascending order
@@ -103,10 +104,10 @@ class DestinyUpdates:
             # get all the channels with service enabled
             channels = guild.getChannels("destinyupdates")
             for channel in channels: 
-                await bot.get_channel(int(channel["channel_id"])).send(embed=embed)
+                await bot.get_channel(channel["channel_id"]).send(embed=embed)
                 # if logging is enabled post log
                 if "logging" in channel:
-                    await bot.get_channel(int(channel["logging"])).send(f"sent {update['title']} in {channel['channel_name']}")
+                    await bot.get_channel(channel["logging"]).send(f"sent {update['title']} in {channel['channel_name']}")
             
             # sleep for 1 second
             await asyncio.sleep(1)

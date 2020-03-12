@@ -15,10 +15,10 @@ class Reddit(commands.Cog):
 
     def cog_unload(self):
         self.gamedeals.cancel()
-        self.crackwatch.start()
+        self.crackwatch.cancel()
         self.cleaner.cancel()
 
-    # 1 month, like bots gonna run continously for 1 month straight
+    # 1 month, like bots gonna run continuously for 1 month straight
     @tasks.loop(hours = 720.0)
     async def cleaner(self): 
         await gamedeals.cleaner(self.bot)

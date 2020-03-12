@@ -80,10 +80,10 @@ class CsgoUpdates:
             # send message
             channels = guild.getChannels("csgoupdates")
             for channel in channels: 
-                await bot.get_channel(int(channel["channel_id"])).send(embed=embed)
+                await bot.get_channel(channel["channel_id"]).send(embed=embed)
                 # if logging is enabled post log
                 if "logging" in channel:
-                    await bot.get_channel(int(channel["logging"])).send(f"sent {update['title']} in {channel['channel_name']}")
+                    await bot.get_channel(channel["logging"]).send(f"sent {update['title']} in {channel['channel_name']}")
 
             # sleep for 1 second
             await asyncio.sleep(1)
