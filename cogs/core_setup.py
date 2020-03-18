@@ -19,15 +19,17 @@ class Core(commands.Cog):
             description = 'To invoke a command use `!<command>`\n'
             description = description + 'To view subcommands use `!<command> help`\n'
             description = description + 'Available commands are : \n'
-            description = description + '**service** - to view available service\n'
-            description = description + '**status** - to view available service\n'
-            description = description + '**mod** - mod commands\n'
+            description = description + '**service**\n'
+            description = description + '**status**\n'
+            description = description + '**mod**\n'
+            description = description + '**fun**\n'
+            description = description + '**pricetracker**\n'
             description = description + '\n'
             description = description + f'`{"!help service" : <20} - to view available services`'
             embed = discord.Embed(title='Help', description=description)
             await ctx.send(embed=embed)
 
-    @help.command(pass_context=True)
+    @help.command()
     async def service(self, ctx):
         description = 'To subscribe to a service type `!service init <servicename>`\n'
         description = description + 'To unsubscribe to a service type `!service deinit <servicename>`\n'
@@ -41,7 +43,7 @@ class Core(commands.Cog):
         embed = discord.Embed(title='Service List', description=description)
         await ctx.send(embed=embed)
 
-    @commands.command(name='load', hidden=True)
+    @commands.command(name='load')
     @commands.is_owner()
     async def load(self, ctx, *, cog: str):
         try:
@@ -52,7 +54,7 @@ class Core(commands.Cog):
             await ctx.send(f'** Loaded: ** {cog}')
             await self.bot.get_channel(self.masterLogger).send(f'** Loaded: ** {cog}')
 
-    @commands.command(name='unload', hidden=True)
+    @commands.command(name='unload')
     @commands.is_owner()
     async def unload(self, ctx, *, cog: str):
         try:
@@ -63,7 +65,7 @@ class Core(commands.Cog):
             await ctx.send(f'** Unloaded: ** {cog}')
             await self.bot.get_channel(self.masterLogger).send(f'** Unloaded: ** {cog}')
 
-    @commands.command(name='reload', hidden=True)
+    @commands.command(name='reload')
     @commands.is_owner()
     async def reload(self, ctx, *, cog: str):
         try:

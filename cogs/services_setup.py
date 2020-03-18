@@ -1,7 +1,4 @@
 from discord.ext import commands
-from .helpers.steam import Steam
-from .helpers.helpmaker import Help
-from .helpers.guild import getChannelByGuild
 from common.database import Database
 from .core_setup import Core
 from common.common import getServiceList
@@ -18,13 +15,13 @@ class Service(commands.Cog):
     @commands.group(pass_context=True)
     async def service(self, ctx):
         if ctx.invoked_subcommand is None:
-            self.core.service(ctx)
+            await self.core.service(ctx)
 
-    @service.command(pass_context=True)
+    @service.command()
     async def help(self, ctx):
-        self.core.service(ctx)
+        await self.core.service(ctx)
 
-    @service.command(pass_context=True)
+    @service.command()
     @commands.has_permissions(manage_guild=True)
     async def init(self, ctx, name: str):
         # get the service list
@@ -54,7 +51,7 @@ class Service(commands.Cog):
         else:
             await ctx.send(f"{name} service not found, see `!help service` for list of available services.")
 
-    @service.command(pass_context=True)
+    @service.command()
     @commands.has_permissions(manage_guild=True)
     async def deinit(self, ctx, name: str):
         # get the service list
@@ -83,6 +80,15 @@ class Service(commands.Cog):
 
         else:
             await ctx.send(f"{name} service not found, see `!help service` for list of available services.")
+
+    @service.command()
+    @commands.is_owner()
+    async def register(self, ctx, name: str):
+        status = self.db.registerService(name)
+        if status:
+            await ctx.send(f"service **{name}** is registered.")
+        else:
+            await ctx.send(f"failed to register **{name}**.")
 
 
 def setup(bot):

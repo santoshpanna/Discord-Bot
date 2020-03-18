@@ -1,7 +1,7 @@
 from common.database import Database
 
 
-def getMember(member):
+def getOwnerInfo(member):
     data = {}
     data['id'] = member.id
     data['name'] = member.name
@@ -12,30 +12,6 @@ def getMember(member):
     data['guild']['name'] = member.guild.name
     data['guild']['shard_id'] = member.guild.shard_id
     data['guild']['chunked'] = member.guild.chunked
-    return data
-
-
-def getMembers(members):
-    data = []
-    for member in members:
-        data.append(getMember(member))
-    return data
-
-
-def getCategoryChannel(category):
-    data = {}
-    data['id'] = category.id
-    data['name'] = category.name
-    data['position'] = category.position
-    data['nsfw'] = category.is_nsfw()
-    data['type'] = category.type
-    return data
-
-
-def getCategoryChannels(categories):
-    data = []
-    for category in categories:
-        data.append(getCategoryChannel(category))
     return data
 
 
@@ -62,40 +38,13 @@ def getChannel(channel):
     return data
 
 
-def getChannelsList(channels):
-    data = []
-    for channel in channels:
-        data.append(getChannel(channel))
-    return data
-
-
-def getRole(role):
-    data = {}
-    data['id'] = role.id
-    data['name'] = role.name
-    data['permissions'] = []
-    for permission in role.permissions:
-        temp = {}
-        temp[permission[0]] = permission[1]
-        data['permissions'].append(temp)
-    return data
-
-
-def getRoles(roles):
-    data = []
-    for role in roles:
-        data.append(getRole(role))
-
-    return data
-
-
 def updateGuidInfo(guild):
     data = {}
     data["name"] = guild.name
     data["region"] = guild.region.name
     data["id"] = guild.id
     data["afk_channel "] = getChannel(guild.afk_channel)
-    data["owner"] = getMember(guild.owner)
+    data["owner"] = getOwnerInfo(guild.owner)
     data["description"] = guild.description
     data["default_notifications"] = guild.default_notifications.name
     data["premium_subscription_count"] = guild.premium_subscription_count
@@ -145,6 +94,7 @@ def getChannels(servicename):
                 channels.append(channel)
 
     return channels
+
 
 def getChannelByGuild(guildid, servicename):
     db = Database()

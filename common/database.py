@@ -12,7 +12,7 @@ class Database:
         client = MongoClient(config['DATABASE']['uri'])
         self.db = client.discordbot
 
-    # services
+    # services - start
     def getService(self, service):
         # returns the specified module data
         return self.db.services.find_one({'name': service})
@@ -28,6 +28,14 @@ class Database:
             {'$set': data}
         ).acknowledged
 
+    def registerService(self, name):
+        obj = self.db.services.find_one({'name': name})
+
+        if obj:
+            return True
+        else:
+            return self.db.services.insert_one({'name': name}).acknowledged
+
     def getChannelByService(self, query):
         return self.db.guild_channel_mapping.find_one(query)
 
@@ -39,7 +47,9 @@ class Database:
             return self.db.services.insert_one(service).acknowledged
         return False
 
-    # steam
+    # # services - end
+
+    # steam - start
     def insertUserSteam(self, steam):
         # inserts a new user for a steam related services 
         data = {
@@ -48,7 +58,9 @@ class Database:
         }
         return self.db.steam.insert_one(data).acknowledged
 
-    # status
+    # # steam - end
+
+    # status - start
     def updateBotStartTime(self):
         # updates the time when the bot starts
 
@@ -69,7 +81,9 @@ class Database:
         # get stats
         return self.db.status.find_one({})
 
-    # guilds
+    # # status - end
+
+    # guilds - start
     def getGuildsByService(self, service):
         return self.db.guilds.find({"services_activated": service})
 
@@ -140,7 +154,9 @@ class Database:
                     return 1
         return -1
 
-    # Game deals
+    # # guilds - end
+
+    # Game deals - start
     def getDeal(self, deal):
         return self.db.gamedeals.find_one({'url': deal['url']})
 
@@ -179,3 +195,115 @@ class Database:
     # function to remove older records
     def cleanDeals(self):
         return self.db.gamedeals.delete_many({'ttl': {'$lte': common.getDatetimeIST()}}).deleted_count
+
+    # # Game Deals - ends
+
+    # member - start
+    def getMember(self, obj):
+        member_id = None
+
+        if isinstance(obj, object):
+            member_id = obj.author.id
+        elif isinstance(obj, str):
+            member_id = int(obj)
+        elif isinstance(obj, int):
+            member_id = obj
+
+        # if member is registered
+        member = self.db.members.find_one({'id': member_id})
+
+        if member:
+            return member
+        # member is not registered
+        else:
+            data = {}
+            data['id'] = member_id
+            data['name'] = obj.author.name
+            data['priceTrackerLimit'] = 5
+            data['isPremium'] = False
+            if self.db.members.insert_one(data).acknowledged:
+                return self.db.members.find_one({"id": obj.author.id})
+            else:
+                return None
+
+    def getPriceDeal(self, url, store):
+        pass
+
+    def insertPriceDeal(self, data):
+        data['dateCreated'] = common.getDatetimeIST()
+        data['dateUpdated'] = common.getDatetimeIST()
+        data['cooldown'] = common.getDatetimeIST()
+
+        return self.db.price_deal_mapping.insert_one(data).acknowledged
+
+    def updatePrice(self, url, members, price):
+        return self.db.price_deal_mapping.update_many(
+            {'url': url},
+            {'$set': {
+                'current_price': price,
+                'cooldown': common.getDatetimeIST() + timedelta(hours=12),
+                'date_updated': common.getDatetimeIST()
+            }}
+        ).acknowledged
+
+    def deleteDeal(self, data):
+        deal = self.db.price_deal_mapping.delete_one(data).deleted_count
+
+        if deal > 0:
+            return True
+        else:
+            return False
+
+    def updateAlertPrice(self, data):
+        deal = self.db.price_deal_mapping.find_one({'member_id': data['member_id'], 'uuid': data['uuid']})
+
+        if not deal:
+            return -1
+        else:
+            update = self.db.price_deal_mapping.update_one({'_id': deal['_id']}, {'$set': {'alert_at': data['alert_at']}}).acknowledged
+            if update:
+                return 1
+            else:
+                return 0
+
+    def updateAlertCurrency(self, data, currency):
+        deal = self.db.price_deal_mapping.find_one({'member_id': data['member_id'], 'uuid': data['uuid']})
+
+        if not deal:
+            return -1
+        else:
+            update = self.db.price_deal_mapping.update_one({'_id': deal['_id']}, {'$set': {'currency': data['currency']}}).acknowledged
+            if update:
+                return 1
+            else:
+                return 0
+
+    def updatePriceCooldown(self, data):
+        deal = self.db.price_deal_mapping.find_one({'member_id': data['member_id'], 'uuid': data['uuid']})
+
+        if not deal:
+            return -1
+        else:
+            update = self.db.price_deal_mapping.update_one({'_id': deal['_id']}, {'$set': {'cooldown': common.getDatetimeIST()}}).acknowledged
+            if update:
+                return 1
+            else:
+                return 0
+
+    def deletePriceAlert(self, data):
+        deleted = self.db.price_deal_mapping.delete_one({'member_id': data['member_id'], 'uuid': data['uuid']}).deleted_count
+        if deleted > 0:
+            return True
+        else:
+            return False
+
+    def getAllPriceDeals(self, data):
+        return self.db.price_deal_mapping.limit(data['limit']).skip(data['offset'])
+
+
+    """ Price Alerts """
+    def getPriceAlerts(self, id:int = None):
+        if id:
+            return self.db.price_deal_mapping.find({'member_id': id})
+        else:
+            return self.db.price_deal_mapping.find()

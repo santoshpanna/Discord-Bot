@@ -11,19 +11,18 @@ A python bot written for personal use.
   - CSGO
   - Destiny 2
 - Moderation
-  - `!remove message <number>`
+  - remove messages
 - Game Specific
   - CSGO
-    - `!csgo`
-    - `!csgo register <steamid/steamprofile>`
+    - csgo server status
 - Status
-  - see server status - `!status server`
-  - set bot status - `!status set "<status>"`
-  - see csgo status, same as `!csgo` - `!status csgo`
+  - server status, set bot status
 - Core
-  - Load service - `!load <servicename>`
-  - Unload service - `!unload <servicename>`
-  - Reload service - `!reload <servicename>`
+  - load, unload, reload services
+- Price Tracker
+  - Supports Amazon
+- Fun Commands
+  - slap
 
 ### Features
 - multiple services
@@ -35,4 +34,5 @@ A python bot written for personal use.
 
 ### Usage
 - update config.cfg variables
+  - rename config.cfg.sample to config.cfg
 - run bot - `python bot.py`

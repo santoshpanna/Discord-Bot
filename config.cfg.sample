@@ -1,5 +1,9 @@
 [COMMON]
-environment = prod | dev
+masterlog = 
+playground = 
+environment = 
+api.url = 
+salt = 
 
 [REDDIT]
 client.id = 
@@ -9,13 +13,12 @@ user.password =
 user.name = 
 
 [DATABASE]
-hostname = 
-port = 
-username = 
-password = 
-groupid = 
 publickey = 
 privatekey = 
+uri = 
+groupid = 
+web.uri = 
+name = 
 
 [DISCORD]
 token = 

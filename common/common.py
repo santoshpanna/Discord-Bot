@@ -2,6 +2,7 @@ import configparser
 from datetime import datetime
 import pytz
 from dateutil.tz import tz
+from hashids import Hashids
 
 dtf_ist = "%d:%m:%Y %H:%M:%S"
 
@@ -60,3 +61,9 @@ def getServiceList():
     service['gamedeals'] = 'Game deal news'
     service['logging'] = 'Logging service for your guild'
     return service
+
+
+def getUID(id):
+    config = getConfig()
+    hashids = Hashids(salt = config['COMMON']['salt'], alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
+    return hashids.encode(int(datetime.today().timestamp())+id)

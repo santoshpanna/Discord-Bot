@@ -24,7 +24,7 @@ class Reddit(commands.Cog):
         await gamedeals.cleaner(self.bot)
 
     @commands.group(pass_context=True)
-    async def clean(self):
+    async def cleandeals(self, ctx):
         await gamedeals.cleaner(self.bot)
 
     @tasks.loop(minutes = 30.0)

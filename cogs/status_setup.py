@@ -14,21 +14,21 @@ class Status(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.masterLog = common.getMasterLog()
-        self.commandList = {}
-        self.commandList['server'] = {'name': 'server', 'description': 'shows details about server'}
-        self.commandList['csgo'] = {'name': 'csgo', 'description': 'shows csgo server status'}
+        self.groupedCommands = {}
+        self.groupedCommands['server'] = {'name': 'server', 'description': 'shows details about server'}
+        self.groupedCommands['csgo'] = {'name': 'csgo', 'description': 'shows csgo server status'}
         self.help = Help()
     
     @commands.group(pass_context=True)
     async def status(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send(embed=self.help.make(ctx.author.name, 'status', self.commandList))
+            await ctx.send(embed=self.help.make(ctx.author.name, 'status', None, self.groupedCommands))
 
-    @status.command(pass_context=True)
+    @status.command()
     async def help(self, ctx):
-        await ctx.send(embed=self.help.make(ctx.author.name, 'status', self.commandList))
+        await ctx.send(embed=self.help.make(ctx.author.name, 'status', None, self.groupedCommands))
 
-    @status.command(pass_context=True)
+    @status.command()
     async def server(self, ctx):
         # subcommand to get the server status
         embed = discord.Embed(
@@ -73,14 +73,14 @@ class Status(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @status.command(pass_context=True)
+    @status.command()
     @commands.is_owner()
     async def set(self, ctx, status: str):
         # subcommand to set the current bot status
         await self.bot.change_presence(status=discord.Status.idle, activity=discord.CustomActivity(name=status))
         await self.bot.get_channel(self.masterLog).send(f"changed status to {status}")
 
-    @status.command(pass_context=True)
+    @status.command()
     async def csgo(self, ctx):
         # commands for csgo
         # if no sub commands is passed display the current no of searching players and players online instead

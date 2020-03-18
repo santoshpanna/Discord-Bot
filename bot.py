@@ -19,6 +19,8 @@ modules = [
     'cogs.scrape_setup',
     'cogs.reddit_setup',
     'cogs.services_setup',
+    'cogs.fun_setup',
+    'cogs.price_setup',
     'cogs.send_setup'
 ]
 

@@ -9,28 +9,28 @@ class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.masterLog = common.getMasterLog()
-        self.commandList = {}
-        self.commandList['remove'] = {'name': 'remove', 'description': 'helps in mass removal.'}
-        self.commandList['remove']['subcommand'] = {}
-        self.commandList['remove']['subcommand']['message'] = {'name': 'remove', 'arguments': 'number', 'description': 'remove <number> messages.'}
+        self.groupedCommands = {}
+        self.groupedCommands['remove'] = {'name': 'remove', 'description': 'helps in mass removal.'}
+        self.groupedCommands['remove']['subcommand'] = {}
+        self.groupedCommands['remove']['subcommand']['message'] = {'name': 'remove', 'arguments': 'number', 'description': 'remove <number> messages.'}
         self.help = Help()
 
     @commands.group(pass_context=True)
     @commands.has_permissions(manage_messages=True)
     async def mod(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send(embed=self.help.make(ctx.author.name, 'mod', self.commandList))
+            await ctx.send(embed=self.help.make(ctx.author.name, 'mod', None, self.groupedCommands))
 
-    @mod.command(pass_context=True)
+    @mod.command()
     async def help(self, ctx):
-        await ctx.send(embed=self.help.make(ctx.author.name, 'mod', self.commandList))
+        await ctx.send(embed=self.help.make(ctx.author.name, 'mod', None, self.groupedCommands))
 
     @mod.group(pass_context=True)
     @commands.has_permissions(manage_messages=True)
     async def remove(self, ctx):
         pass
 
-    @remove.command(pass_context=True)
+    @remove.command()
     @commands.has_permissions(manage_messages=True)
     async def message(self, ctx, number:int):
         if number > 50:
