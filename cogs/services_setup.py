@@ -15,11 +15,31 @@ class Service(commands.Cog):
     @commands.group(pass_context=True)
     async def service(self, ctx):
         if ctx.invoked_subcommand is None:
-            await self.core.service(ctx)
+            description = 'To subscribe to a service type `!service init <servicename>`\n'
+        description = description + 'To unsubscribe to a service type `!service deinit <servicename>`\n'
+        description = description + 'Available services are : \n'
+        servicelist = getServiceList()
+        for service in servicelist:
+            description = description + f'**{service : <30}** - {servicelist[service]}\n'
+        description = description + '\n'
+        description = description + 'Type the ***init*** and ***deinit*** command in channel you want to subscribe service in.'
+        description = description + ' Multiple service can be subscribed to in one channel.'
+        embed = discord.Embed(title='Service List', description=description)
+        await ctx.send(embed=embed)
 
     @service.command()
     async def help(self, ctx):
-        await self.core.service(ctx)
+        description = 'To subscribe to a service type `!service init <servicename>`\n'
+        description = description + 'To unsubscribe to a service type `!service deinit <servicename>`\n'
+        description = description + 'Available services are : \n'
+        servicelist = getServiceList()
+        for service in servicelist:
+            description = description + f'**{service : <30}** - {servicelist[service]}\n'
+        description = description + '\n'
+        description = description + 'Type the ***init*** and ***deinit*** command in channel you want to subscribe service in.'
+        description = description + ' Multiple service can be subscribed to in one channel.'
+        embed = discord.Embed(title='Service List', description=description)
+        await ctx.send(embed=embed)
 
     @service.command()
     @commands.has_permissions(manage_guild=True)

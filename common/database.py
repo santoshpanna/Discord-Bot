@@ -298,7 +298,7 @@ class Database:
             return False
 
     def getAllPriceDeals(self, data):
-        return self.db.price_deal_mapping.limit(data['limit']).skip(data['offset'])
+        return self.db.price_deal_mapping.find().limit(data['limit']).skip(data['offset'])
 
 
     """ Price Alerts """
