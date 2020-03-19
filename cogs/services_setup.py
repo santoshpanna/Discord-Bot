@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 from common.database import Database
 from .core_setup import Core
