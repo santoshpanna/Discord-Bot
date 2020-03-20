@@ -1,5 +1,5 @@
 from discord.ext import tasks, commands
-import discord
+import discord, pprint
 from .price.amazon import Amazon
 from .helpers.helpmaker import Help
 from .helpers import guild
@@ -123,42 +123,37 @@ class Reddit(commands.Cog):
             await ctx.send(f"{ctx.author.name} you have no active price alert subscription.")
 
 
-    def createRichDeals(self, deals):
-        rich_deals = {}
+    def createRichDeals(self, deals, deal):
+        # check if url already exist in dictionary
+        if deal['url'] not in deals:
+            # make temporary dictionary
+            temp = {}
+            temp['_id'] = deal["_id"]
+            temp['title'] = deal['title']
 
-        # iterate list
-        for deal in deals:
-            # check if url already exist in dictionary
-            if deal['url'] not in rich_deals:
-                # make temporary dictionary
-                temp = {}
-                temp['_id'] = deal["_id"]
+            # make member dictionary
+            temp['members'] = []
+            member = {}
+            member['id'] = deal['member_id']
+            member['alert_at'] = deal['alert_at']
+            member['currency'] = deal['currency']
+            member['uuid'] = deal['uuid']
+            member['cooldown'] = deal['cooldown']
 
-                # make member dictionary
-                temp['members'] = []
-                member = {}
-                member['id'] = deal['member_id']
-                member['alert_at'] = deal['alert_at']
-                member['currency'] = deal['currency']
-                member['uuid'] = deal['uuid']
-                member['cooldown'] = deal['cooldown']
+            temp['members'].append(member)
+            temp['service'] = deal['service']
+            temp['service_id'] = deal['service_id']
 
-                temp['members'].append(member)
-                temp['service'] = deal['service']
-                temp['service_id'] = deal['service_id']
-
-                # add temporary dictionary to main dictionary with key being the url
-                rich_deals[deal['url']] = temp
-            # key already exists
-            else:
-                # add member to existing dictionary
-                member = {}
-                member['id'] = deal['member_id']
-                member['alert_at'] = deal['alert_at']
-                member['uuid'] = deal['uuid']
-                rich_deals[deal['url']]['members'].append(member)
-
-        return rich_deals
+            # add temporary dictionary to main dictionary with key being the url
+            deals[deal['url']] = temp
+        # key already exists
+        else:
+            # add member to existing dictionary
+            member = {}
+            member['id'] = deal['member_id']
+            member['alert_at'] = deal['alert_at']
+            member['uuid'] = deal['uuid']
+            deals[deal['url']]['members'].append(member)
 
     @tasks.loop(hours = 1.0)
     async def deals(self):
@@ -168,11 +163,12 @@ class Reddit(commands.Cog):
         data['offset'] = 0
 
         # all deals container
-        all_deals = []
+        all_deals = {}
 
         # first query to get the count and initial 1000 deals
         deals = self.db.getAllPriceDeals(data)
-        all_deals.append(all_deals)
+        for deal in deals:   
+            self.createRichDeals(all_deals, deal)
 
         # if count g.t. limit : e.g 1024 >= 1000
         # and count l.t. offset + limit : e.g
@@ -182,17 +178,15 @@ class Reddit(commands.Cog):
         while count >= data['limit'] and count <= (data['offset'] + data['limit']):
             data['offset'] = data['offset'] + data['limit']
             deals = self.db.getAllPriceDeals(data)
-            all_deals.extend(deals)
+            for deal in deals:   
+                self.createRichDeals(all_deals, deal)
 
-        # reformat deals so that its a hashset of url's
-        deals = self.createRichDeals(all_deals)
-
-        for key in deals:
+        for key in all_deals:
             price = None
             min_price = None
             flag = False
             # check for service name
-            if deals[key]['service'] == 'amazon':
+            if all_deals[key]['service'] == 'amazon':
                 # get current price
                 price = self.amazon.getPrice(key)
                 min_price = self.amazon.getMin(price)
@@ -200,7 +194,7 @@ class Reddit(commands.Cog):
             # if price exists i.e., product is not out of stock
             if min_price:
                 # iterate the members
-                for member in deals[key]['members']:
+                for member in all_deals[key]['members']:
                     if member['currency'] == u"\u00A4":
                         self.db.updateAlertCurrency(member, price['currency'])
                     # if price is lower than alert price or equal to alert price, send a private message
@@ -209,7 +203,7 @@ class Reddit(commands.Cog):
                         # db update flag
                         flag = True
             if flag:
-                self.db.updatePrice(key, deals[key]['members'], min_price)
+                self.db.updatePrice(key, all_deals[key]['members'], min_price)
 
 def setup(bot):
     bot.add_cog(Reddit(bot))

@@ -38,7 +38,7 @@ class Amazon:
         res = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(res.content, 'html5lib')
 
-        price['title'] = soup.find(id="productTitle")
+        price['title'] = soup.find(id="productTitle").get_text().strip()
 
         regular_price = soup.find(id="priceblock_ourprice")
         # product is out of stock
@@ -48,6 +48,9 @@ class Amazon:
         # lightning deal is going on
         if deal_price:
             price['currency'], price['deal'] = self.filterPrice(deal_price)
+
+        if deal_price and not regular_price:
+                price['regular'] = price['deal']
 
         return price
 
@@ -61,10 +64,7 @@ class Amazon:
         return price['regular']
 
     async def insertDeal(self, bot, ctx, url, alert_price):
-        # -1 - failed to query link
-        # 0 - not an amazon link
-        # 1 - operation successful
-        # 2 - out of stock
+        # check if link is amazon
         if self.isAmazonLink(url):
             # get member, mapping and service
             url = self.cleanURL(url)
@@ -110,11 +110,12 @@ class Amazon:
                         data['service_id'] = str(service['_id'])
                         data['url'] = url
                         data['uuid'] = common.getUID(ctx.author.id)
-                        data['alert_at'] = alert_price
+                        data['alert_at'] = int(alert_price)
                         # u"\u00A4" is symbol for unknow currency
                         if not price:
                             data['currency'] = u"\u00A4"
                         else:
+                            data['title'] = price['title']
                             data['currency'] = price['currency']
                         status = self.db.insertPriceDeal(data)
 
