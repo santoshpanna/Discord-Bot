@@ -61,6 +61,7 @@ class DestinyUpdates:
                 posts['date'] = posts['date'].replace("h", "")
                 delta = timedelta(hours=int(posts['date']))
                 posts['date'] = str(datetime.strftime((datetime.today() - delta), "%b %d, %Y"))
+                posts['date'] = str(datetime.strptime(posts['date'], "%b %d, %Y"))[:-9]
 
             posts['patchnotes'] = str(detail_soup.find("div", attrs={"class":"content text-content"}))
 
@@ -88,7 +89,6 @@ class DestinyUpdates:
             if posts['date'] == service["latest"]:
                 break
             else:
-                await bot.get_channel(masterLogger).send(f'**from d2** : latest = {service["latest"]} id = {posts["date"]}')
                 updates.append(posts)
 
         # returns list in ascending order
