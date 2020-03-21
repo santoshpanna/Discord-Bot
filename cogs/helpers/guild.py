@@ -99,7 +99,7 @@ def getChannels(servicename):
 def getChannelByGuild(guildid, servicename):
     db = Database()
     query = {}
-    query["guild_id"] = str(guildid)
+    query["guild_id"] = guildid
     service = db.getService(servicename)
     query["service_ids"] = str(service["_id"])
     return db.getChannelByService(query)

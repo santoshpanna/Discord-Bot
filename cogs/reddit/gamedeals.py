@@ -122,7 +122,8 @@ class GameDeals:
                     if 'steampowered.com' in post['url']:
                         try:
                             existingDeal = db.getDeal(post)
-                            newprice = self.ssf.getPrice(url=post['url'])['final']
+                            newprice = self.ssf.getPrice(url=post['url'])
+                            newprice = newprice['final'] if newprice else 9223372036854775806
                             if 'price' in existingDeal:
                                 oldprice = existingDeal['price']
                                 # if new price is less than older price post the deal
