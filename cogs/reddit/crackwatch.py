@@ -71,10 +71,10 @@ class CrackWatch:
         # go through new submissions
         for i in range(len(posts)):
             if not posts[i]['flair']:
-                await bot.get_channel(masterLogger).send(f"**error:** check {posts[i]['url']}.")
+                await bot.get_channel(masterLogger).send(f"**error in cw [no flair]** : check {posts[i]['url']}.")
 
             # check for release flair
-            elif posts[i]['flair'].lower() == "release":
+            elif 'release' in posts[i]['flair'].lower():
                 description = posts[i]['selftext']
 
                 # discord embed description limit

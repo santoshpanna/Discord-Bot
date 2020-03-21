@@ -37,8 +37,10 @@ class Amazon:
         price = {}
         res = requests.get(url, headers=self.headers)
         soup = BeautifulSoup(res.content, 'html5lib')
-
-        price['title'] = soup.find(id="productTitle").get_text().strip()
+        try:
+            price['title'] = soup.find(id="productTitle").get_text().strip()
+        except Exception as e:
+            price['title'] = url
 
         regular_price = soup.find(id="priceblock_ourprice")
         # product is out of stock
@@ -61,7 +63,10 @@ class Amazon:
         if 'deal' in price:
             if price['deal'] < price['regular']:
                 return price['deal']
-        return price['regular']
+        elif 'regular' in price:
+            return price['regular']
+        else:
+            return None
 
     async def insertDeal(self, bot, ctx, url, alert_price):
         # check if link is amazon
