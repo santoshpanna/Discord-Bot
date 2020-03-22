@@ -25,7 +25,7 @@ class CSGO(commands.Cog):
 
     @csgo.command()
     async def help(self, ctx):
-        await ctx.send(embed=self.help.make(ctx.author.name, 'csgo', self.directCommands, None))
+        await ctx.send(embed=self.help.make(ctx.author.name, 'csgo', self.directCommands, None, None))
 
     @csgo.command()
     async def register(self, ctx, username: str):

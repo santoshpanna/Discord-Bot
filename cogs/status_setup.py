@@ -22,11 +22,11 @@ class Status(commands.Cog):
     @commands.group(pass_context=True)
     async def status(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send(embed=self.help.make(ctx.author.name, 'status', None, self.groupedCommands))
+            await ctx.send(embed=self.help.make(ctx.author.name, 'status', None, self.groupedCommands, None))
 
     @status.command()
     async def help(self, ctx):
-        await ctx.send(embed=self.help.make(ctx.author.name, 'status', None, self.groupedCommands))
+        await ctx.send(embed=self.help.make(ctx.author.name, 'status', None, self.groupedCommands, None))
 
     @status.command()
     async def server(self, ctx):

@@ -9,6 +9,8 @@ class Reddit(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.cw = CrackWatch()
+        self.gd = GameDeals()
         self.gamedeals.start()
         self.crackwatch.start()
         self.cleaner.start()
@@ -22,22 +24,16 @@ class Reddit(commands.Cog):
     @tasks.loop(hours = 720.0)
     async def cleaner(self): 
         await gamedeals.cleaner(self.bot)
-
-    @commands.group(pass_context=True)
-    async def cleandeals(self, ctx):
-        await gamedeals.cleaner(self.bot)
+        await self.cw.cleaner(self.bot)
 
     @tasks.loop(minutes = 30.0)
     async def gamedeals(self):            
         # r/SteamDeals r/gamedeals r/Freegamefindings
-        gd = GameDeals()
-        await gd.run(self.bot)
+        await self.gd.run(self.bot)
 
     @tasks.loop(minutes = 60.0)
     async def crackwatch(self):
-        # r/CrackWatch
-        cw = CrackWatch()
-        await cw.run(self.bot)
+        await self.cw.run(self.bot)
 
 
 def setup(bot):

@@ -1,6 +1,8 @@
 from discord.ext import tasks, commands
 import discord, pprint
 from .price.amazon import Amazon
+from .price.flipkart import Flipkart
+from .price.headphonezone import Headphonezone
 from .helpers.helpmaker import Help
 from .helpers import guild
 from common.database import Database
@@ -16,6 +18,8 @@ class Reddit(commands.Cog):
         self.cleaner.start()
         self.masterLogger = common.getMasterLog()
         self.amazon = Amazon()
+        self.flipkart = Flipkart()
+        self.headphonezone = Headphonezone()
         self.groupedCommands = {}
         self.db = Database()
         self.groupedCommands['sub'] = {'name': 'sub', 'arguments': 'url alert_price', 'description': 'adds url for tracking with trigger when current price is lower than alert_price'}
@@ -23,13 +27,14 @@ class Reddit(commands.Cog):
         self.groupedCommands['update'] = {'name': 'update', 'arguments': 'uuid alert_price', 'description': 'updates current deal with newer alert_price.'}
         self.groupedCommands['cooldown'] = {'name': 'cooldown', 'arguments': 'uuid','description': 'resets the cooldown time so that you get continuous price alerts.'}
         self.groupedCommands['list'] = {'name': 'list', 'description': 'lists all subscribed pricealerts by user.'}
+        self.extra = 'Supported stores are amazon, flipkart and headphonezone.'
         self.help = Help()
 
     def cog_unload(self):
         self.deals.cancel()
         self.cleaner.cancel()
 
-    # 1 month, like bots gonna run continuously for 1 month straight
+    # todo - implement cleanup routines
     @tasks.loop(hours = 168.0)
     async def cleaner(self): 
         # self.db.dealsCleaner(self.bot)
@@ -38,11 +43,11 @@ class Reddit(commands.Cog):
     @commands.group(pass_context=True)
     async def pricetracker(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send(embed=self.help.make(ctx.author.name, 'pricetracker', None, self.groupedCommands))
+            await ctx.send(embed=self.help.make(ctx.author.name, 'pricetracker', None, self.groupedCommands, self.extra))
 
     @pricetracker.command()
     async def help(self, ctx):
-        await ctx.send(embed=self.help.make(ctx.author.name, 'pricetracker', None, self.groupedCommands))
+        await ctx.send(embed=self.help.make(ctx.author.name, 'pricetracker', None, self.groupedCommands, self.extra))
 
     @pricetracker.command()
     @commands.is_owner()
@@ -54,6 +59,10 @@ class Reddit(commands.Cog):
     async def sub(self, ctx, url: str, alert: str):
         if self.amazon.isAmazonLink(url):
             await self.amazon.insertDeal(self.bot, ctx, url, alert)
+        elif self.flipkart.isFlipkartLink(url):
+            await self.flipkart.insertDeal(self.bot, ctx, url, alert)
+        elif self.headphonezone.isHeadphonezoneLink(url):
+            await self.headphonezone.insertDeal(self.bot, ctx, url, alert)
         else:
             if url.strip() == "":
                 await ctx.send("f{ctx.author.name}, url is empty.")
@@ -183,27 +192,36 @@ class Reddit(commands.Cog):
 
         for key in all_deals:
             price = None
-            min_price = None
             flag = False
             # check for service name
             if all_deals[key]['service'] == 'amazon':
-                # get current price
                 price = self.amazon.getPrice(key)
-                min_price = self.amazon.getMin(price)
+                if price and isinstance(price, dict):
+                    price['current'] = self.amazon.getMin(price)
+
+            elif all_deals[key]['service'] == 'flipkart':
+                price = self.flipkart.getPrice(key)
+                if price and isinstance(price, dict):
+                    price['current'] = price['regular']
+
+            elif all_deals[key]['service'] == 'headphonezone':
+                price = self.headphonezone.getPrice(key)
+                if price and isinstance(price, dict):
+                    price['current'] = price['regular']
 
             # if price exists i.e., product is not out of stock
-            if min_price:
+            if 'current' in price and price['current']:
                 # iterate the members
                 for member in all_deals[key]['members']:
                     if member['currency'] == u"\u00A4":
                         self.db.updateAlertCurrency(member, price['currency'])
                     # if price is lower than alert price or equal to alert price, send a private message
-                    if min_price < member['alert_at'] and common.getDatetimeIST() >= member['cooldown']:
-                        self.bot.send_message(member['id'], f'Price for **{price["title"]}** has dropped and is now **{price["currency"]} {min_price}.00**.\nPlease update alert price by command `!pricetracker update {member["uuid"]} <new alert price>` or,\nDelete this deal by `!pricetracker delete {member["uuid"]}`\nFurther alerts for this deal is supressed for next 12 hours.\nIf you want to continue to receive in price alerts in cooldown period, issue command by `!pricetracker cooldown {member["uuid"]}`.')
+                    if price['current'] < member['alert_at'] and common.getDatetimeIST() >= member['cooldown']:
+                        self.bot.send_message(member['id'], f'Price for **{price["title"]}** has dropped and is now **{price["currency"]} {price["current"]}.00**.\nPlease update alert price by command `!pricetracker update {member["uuid"]} <new alert price>` or,\nDelete this deal by `!pricetracker delete {member["uuid"]}`\nFurther alerts for this deal is supressed for next 12 hours.\nIf you want to continue to receive in price alerts in cooldown period, issue command by `!pricetracker cooldown {member["uuid"]}`.')
                         # db update flag
                         flag = True
             if flag:
-                self.db.updatePrice(key, all_deals[key]['members'], min_price)
+                self.db.updatePrice(key, all_deals[key]['members'], price['current'])
 
 def setup(bot):
     bot.add_cog(Reddit(bot))

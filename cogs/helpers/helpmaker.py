@@ -3,7 +3,7 @@ import discord
 
 class Help:
 
-    def make(self, author, name, directcommands, groupedcommands):
+    def make(self, author, name, directcommands, groupedcommands, extra):
         description = ""
         description = description + f'Hello {author}.\n'
         if directcommands:
@@ -36,6 +36,9 @@ class Help:
                     description = description + f'**{command["name"]}** ***{command["arguments"]}*** - {command["description"]}\n'
                 else:
                     description = description + f'**{command["name"]}** - {command["description"]}\n'
+
+        if extra:
+            description = description + f'\n{extra}\n'
 
         embed = discord.Embed(title=f'Help for !{name}', description=description)
         return embed
