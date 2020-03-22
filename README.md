@@ -20,7 +20,7 @@ A python bot written for personal use.
 - Core
   - load, unload, reload services
 - Price Tracker
-  - Supports Amazon
+  - Supports Amazon, Flipkart, HeadphoneZone
 - Fun Commands
   - slap
 

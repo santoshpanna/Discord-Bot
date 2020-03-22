@@ -21,6 +21,7 @@ modules = [
     'cogs.services_setup',
     'cogs.fun_setup',
     'cogs.price_setup',
+    'cogs.cleaner_setup',
     'cogs.send_setup'
 ]
 

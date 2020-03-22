@@ -20,11 +20,11 @@ class Send(commands.Cog):
     @commands.group(pass_context=True)
     async def send(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send(embed=self.help.make(ctx.author.name, 'send', None, self.groupedCommands))
+            await ctx.send(embed=self.help.make(ctx.author.name, 'send', None, self.groupedCommands, None))
 
     @send.command()
     async def help(self, ctx):
-        await ctx.send(embed=self.help.make(ctx.author.name, 'send', None, self.groupedCommands))
+        await ctx.send(embed=self.help.make(ctx.author.name, 'send', None, self.groupedCommands, None))
 
     @send.command()
     async def deal(self, ctx, url: str):

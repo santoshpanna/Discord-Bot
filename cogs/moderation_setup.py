@@ -19,11 +19,11 @@ class Moderation(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def mod(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send(embed=self.help.make(ctx.author.name, 'mod', None, self.groupedCommands))
+            await ctx.send(embed=self.help.make(ctx.author.name, 'mod', None, self.groupedCommands, None))
 
     @mod.command()
     async def help(self, ctx):
-        await ctx.send(embed=self.help.make(ctx.author.name, 'mod', None, self.groupedCommands))
+        await ctx.send(embed=self.help.make(ctx.author.name, 'mod', None, self.groupedCommands, None))
 
     @mod.group(pass_context=True)
     @commands.has_permissions(manage_messages=True)

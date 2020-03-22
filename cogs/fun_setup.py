@@ -20,11 +20,11 @@ class Fun(commands.Cog):
     @commands.group(pass_context=True)
     async def fun(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send(embed=self.help.make(ctx.author.name, 'fun', self.directCommands, None))
+            await ctx.send(embed=self.help.make(ctx.author.name, 'fun', self.directCommands, None, None))
 
     @fun.command()
     async def help(self, ctx):
-        await ctx.send(embed=self.help.make(ctx.author.name, 'fun', self.directCommands, None))
+        await ctx.send(embed=self.help.make(ctx.author.name, 'fun', self.directCommands, None, None))
 
     @commands.command()
     async def slap(self, ctx):

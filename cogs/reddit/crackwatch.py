@@ -12,6 +12,18 @@ class CrackWatch:
         config = common.getConfig()
         self.r = praw.Reddit(client_id=config['REDDIT']['client.id'], client_secret=config['REDDIT']['client.secret'], user_agent=config['REDDIT']['user.agent'])
 
+    async def cleaner(self, bot):
+        db = database.Database()
+
+        masterlog = common.getMasterLog()
+        masterlog = bot.get_channel(masterlog)
+
+        await masterlog.send(f"purging old cracks.")
+
+        db.cleanCrackwatch()
+
+        await masterlog.send(f"purged cracks.")
+
     # get new results
     def getSubreddit(self, limit):
         rsub = self.r.subreddit('CrackWatch')
@@ -72,77 +84,87 @@ class CrackWatch:
         for i in range(len(posts)):
             if not posts[i]['flair']:
                 await bot.get_channel(masterLogger).send(f"**error in cw [no flair]** : check {posts[i]['url']}.")
+            else:
+                if 'release' in posts[i]['flair'].lower():
+                    posts[i]['type'] = 'crack'
+                elif "repack" in posts[i]['flair'].lower():
+                    posts[i]['type'] = 'repack'
+                else:
+                    posts[i]['type'] = 'unknown'
 
-            # check for release flair
-            elif 'release' in posts[i]['flair'].lower():
-                description = posts[i]['selftext']
-
-                # discord embed description limit
-                if len(posts[i]['selftext']) >= 2048:
-                    description = description[:2040]+"\n..."
+                status = db.upsertCrackwatch(post)
                 
-                embed = discord.Embed(
-                    title=posts[i]['title'],
-                    url=posts[i]['url'],
-                    description=description
-                )
+                if status == 2:
+                    # check for release flair
+                    if posts[i]['type'] == 'crack':
+                        description = posts[i]['selftext']
 
-                links = re.findall(r"(?:http\:|https\:)?\/\/\S*\.(?:png|jpg)[A-Za-z0-9.\/\-\_\?\=\:]*", description)
+                        # discord embed description limit
+                        if len(posts[i]['selftext']) >= 2048:
+                            description = description[:2040]+"\n..."
+                        
+                        embed = discord.Embed(
+                            title=posts[i]['title'],
+                            url=posts[i]['url'],
+                            description=description
+                        )
 
-                if len(links) > 0:
-                    embed.set_image(url=links[0])
-                elif posts[i]['url'].endswith(".jpg") or posts[i]['url'].endswith(".png"):
-                    embed.set_image(url=posts[i]['url'])
+                        links = re.findall(r"(?:http\:|https\:)?\/\/\S*\.(?:png|jpg)[A-Za-z0-9.\/\-\_\?\=\:]*", description)
 
-                embed.add_field(
-                    name="Time",
-                    value=posts[i]['created'],
-                    inline=True
-                )
-                
-                # send message
-                channels = guild.getChannels("crackwatch")
-                for channel in channels: 
-                    await bot.get_channel(channel["channel_id"]).send(embed=embed)
-                    # if logging is enabled post log
-                    if "logging" in channel:
-                        await bot.get_channel(channel["logging"]).send(f"sent {posts[i]['title']} in {channel['channel_name']}")
+                        if len(links) > 0:
+                            embed.set_image(url=links[0])
+                        elif posts[i]['url'].endswith(".jpg") or posts[i]['url'].endswith(".png"):
+                            embed.set_image(url=posts[i]['url'])
 
-                # sleep for 1 sec
-                await asyncio.sleep(1)
+                        embed.add_field(
+                            name="Time",
+                            value=posts[i]['created'],
+                            inline=True
+                        )
+                        
+                        # send message
+                        channels = guild.getChannels("crackwatch")
+                        for channel in channels: 
+                            await bot.get_channel(channel["channel_id"]).send(embed=embed)
+                            # if logging is enabled post log
+                            if "logging" in channel:
+                                await bot.get_channel(channel["logging"]).send(f"sent {posts[i]['title']} in {channel['channel_name']}")
 
-            # check for repack flair
-            elif "repack" in posts[i]['flair'].lower():
-                embed = discord.Embed(
-                    title=posts[i]['title'],
-                    url=posts[i]['url'],
-                    description=posts[i]['selftext']
-                )
+                        # sleep for 1 sec
+                        await asyncio.sleep(1)
 
-                if posts[i]['url'].endswith(".jpg") or posts[i]['url'].endswith(".png"):
-                    embed.set_image(url=posts[i]['url'])
+                    # check for repack flair
+                    elif posts[i]['type'] == 'repack':
+                        embed = discord.Embed(
+                            title=posts[i]['title'],
+                            url=posts[i]['url'],
+                            description=posts[i]['selftext']
+                        )
 
-                embed.add_field(
-                    name="Time",
-                    value=posts[i]['created'],
-                    inline=True
-                )
-                
-                # send message
-                channels = guild.getChannels("repacknews")
-                for channel in channels: 
-                    await bot.get_channel(channel["channel_id"]).send(embed=embed)
-                    # if logging is enabled post log
-                    if "logging" in channel:
-                        await bot.get_channel(channel["logging"]).send(f"sent {posts[i]['title']} in {channel['channel_name']}")
+                        if posts[i]['url'].endswith(".jpg") or posts[i]['url'].endswith(".png"):
+                            embed.set_image(url=posts[i]['url'])
 
-                # sleep for 1 second
-                await asyncio.sleep(1)
+                        embed.add_field(
+                            name="Time",
+                            value=posts[i]['created'],
+                            inline=True
+                        )
+                        
+                        # send message
+                        channels = guild.getChannels("repacknews")
+                        for channel in channels: 
+                            await bot.get_channel(channel["channel_id"]).send(embed=embed)
+                            # if logging is enabled post log
+                            if "logging" in channel:
+                                await bot.get_channel(channel["logging"]).send(f"sent {posts[i]['title']} in {channel['channel_name']}")
+
+                        # sleep for 1 second
+                        await asyncio.sleep(1)
 
         # update database
         data = {}
         data["name"] = "crackwatch"
-        if len(posts) != 0:
+        if len(posts) > 0:
             data["lastposted"] = common.getDatetimeIST()
             data["latest"] = id
 

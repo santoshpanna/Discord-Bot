@@ -307,3 +307,46 @@ class Database:
             return self.db.price_deal_mapping.find({'member_id': id})
         else:
             return self.db.price_deal_mapping.find()
+
+
+    # Crack Watch - start
+    def getCrackwatch(self, crack):
+        return self.db.crackwatch.find_one({'url': crack['id']})
+
+    def upsertCrackwatch(self, crack):
+        # add time to live
+        crack['ttl'] = common.getDatetimeIST() + timedelta(days=30)
+
+        exists = self.db.crackwatch.find_one({'url': crack['id']})
+
+        if exists:
+            crack['updated_at'] = common.getDatetimeIST()
+            status = self.db.crackwatch.update_one(
+                {'_id': exists['_id']},
+                {'$set': crack}
+            ).acknowledged
+
+            if status:
+                return 1
+
+        else:
+            crack['created_at'] = common.getDatetimeIST()
+            status = self.db.crackwatch.insert_one(crack).acknowledged
+
+            if status:
+                return 2
+
+        return -1
+
+    def checkGetCrackwatch(self, crack):
+        exists = self.db.crackwatch.find_one({'url': crack['url']})
+        if exists:
+            return exists
+        else:
+            return False
+
+    # function to remove older records
+    def cleanCrackwatch(self):
+        return self.db.crackwatch.delete_many({'ttl': {'$lte': common.getDatetimeIST()}}).deleted_count
+
+    # # Crack Watch - ends
