@@ -92,7 +92,7 @@ class CrackWatch:
                 else:
                     posts[i]['type'] = 'unknown'
 
-                status = db.upsertCrackwatch(post)
+                status = db.upsertCrackwatch(posts[i])
                 
                 if status == 2:
                     # check for release flair
