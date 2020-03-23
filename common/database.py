@@ -311,13 +311,13 @@ class Database:
 
     # Crack Watch - start
     def getCrackwatch(self, crack):
-        return self.db.crackwatch.find_one({'url': crack['id']})
+        return self.db.crackwatch.find_one({'id': crack['id']})
 
     def upsertCrackwatch(self, crack):
         # add time to live
         crack['ttl'] = common.getDatetimeIST() + timedelta(days=30)
 
-        exists = self.db.crackwatch.find_one({'url': crack['id']})
+        exists = self.db.crackwatch.find_one({'id': crack['id']})
 
         if exists:
             crack['updated_at'] = common.getDatetimeIST()
@@ -339,7 +339,7 @@ class Database:
         return -1
 
     def checkGetCrackwatch(self, crack):
-        exists = self.db.crackwatch.find_one({'url': crack['url']})
+        exists = self.db.crackwatch.find_one({'id': crack['id']})
         if exists:
             return exists
         else:
