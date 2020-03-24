@@ -19,11 +19,9 @@ class Core(commands.Cog):
             description = 'To invoke a command use `!<command>`\n'
             description = description + 'To view subcommands use `!<command> help`\n'
             description = description + 'Available commands are : \n'
-            description = description + '**service**\n'
-            description = description + '**status**\n'
-            description = description + '**mod**\n'
-            description = description + '**fun**\n'
-            description = description + '**pricetracker**\n'
+            _commands = common.getCommands()
+            for _command in _commands:
+                description = description + f'**{_command}**\n'
             description = description + '\n'
             description = description + f'`{"!help service" : <20} - to view available services`'
             embed = discord.Embed(title='Help', description=description)

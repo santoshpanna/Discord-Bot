@@ -64,6 +64,17 @@ def getServiceList():
     return service
 
 
+def getCommands():
+    commands = []
+    commands.append('service')
+    commands.append('status')
+    commands.append('mod')
+    commands.append('fun')
+    commands.append('pricetracker')
+    commands.append('roles')
+    return commands
+
+
 def getUID(id):
     config = getConfig()
     hashids = Hashids(salt = config['COMMON']['salt'], alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890")
