@@ -2,6 +2,8 @@
 A python bot written for personal use.
 
 ## Services
+- Roles
+  - Initialize channel with specific role, delete role, de-initialize roles for channel
 - Reddit
   - Game deal news 
     - `scrapes r/freegamefindings, r/steamdeals, r/gamedeals`
@@ -28,6 +30,7 @@ A python bot written for personal use.
 - multiple services
 - support for multiple guilds
 - support for service and channel mapping in guilds
+- supports role management
 
 ### Upcoming 
 - Web interface
@@ -36,3 +39,4 @@ A python bot written for personal use.
 - update config.cfg variables
   - rename config.cfg.sample to config.cfg
 - run bot - `python bot.py`
+- type `!help` to see a list of available commands

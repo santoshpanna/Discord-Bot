@@ -6,12 +6,11 @@ from common import database, common
 config = common.getConfig()
 token = config['DISCORD']['token']
 
-bot = commands.Bot(command_prefix="!")
+bot = commands.Bot(command_prefix=config['DISCORD']['prefix'])
 
 formatter = commands.HelpCommand(show_check_failure=False)
 
 modules = [
-    # 'cogs.playground_setup',
     'cogs.status_setup',
     'cogs.core_setup',
     'cogs.moderation_setup',
@@ -22,7 +21,8 @@ modules = [
     'cogs.fun_setup',
     'cogs.price_setup',
     'cogs.cleaner_setup',
-    'cogs.send_setup'
+    'cogs.send_setup',
+    'cogs.roles_setup'
 ]
 
 

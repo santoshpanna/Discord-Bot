@@ -28,13 +28,13 @@ class Database:
             {'$set': data}
         ).acknowledged
 
-    def registerService(self, name):
+    def registerService(self, name, display_name):
         obj = self.db.services.find_one({'name': name})
 
         if obj:
             return True
         else:
-            return self.db.services.insert_one({'name': name}).acknowledged
+            return self.db.services.insert_one({'name': name, 'service_name': display_name}).acknowledged
 
     def getChannelByService(self, query):
         return self.db.guild_channel_mapping.find_one(query)

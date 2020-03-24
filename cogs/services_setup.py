@@ -104,8 +104,8 @@ class Service(commands.Cog):
 
     @service.command()
     @commands.is_owner()
-    async def register(self, ctx, name: str):
-        status = self.db.registerService(name)
+    async def register(self, ctx, name: str, display_name: str):
+        status = self.db.registerService(name, display_name)
         if status:
             await ctx.send(f"service **{name}** is registered.")
         else:
