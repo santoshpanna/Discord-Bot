@@ -97,8 +97,10 @@ class Roles(commands.Cog):
                 await self.bot.get_channel(logChannel['channel_id']).send(f'**Channel permission change** : **{ctx.author.name}** changed **{ctx.channel.name}** permission visible only to role **{name}**.')
 
             # post a general message in current channel
-            await ctx.send(f"Channel permission updated for **{ctx.channel.name}** by **{ctx.author.name}**.")
-
+            try:
+                await ctx.send(f"Channel permission updated for **{ctx.channel.name}** by **{ctx.author.name}**.")
+            except Exception:
+                pass
             # add a new message to roles channel so that users can react and subscribe to roles
             await self.bot.get_channel(rolesChannel['channel_id']).send(f'To subscribe to @{name} react with :heart:, to un-subscribe react with :broken_heart:. **{name}** give you access to {message}.')
         else:

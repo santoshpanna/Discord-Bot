@@ -1,6 +1,8 @@
 # Discord Bot
 A python bot written for personal use.
 
+[Invite Bot to your server](https://discordapp.com/api/oauth2/authorize?client_id=655534624491175937&permissions=1896574067&scope=bot)
+
 ## Services
 - Roles
   - Initialize channel with specific role, delete role, de-initialize roles for channel
