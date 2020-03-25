@@ -75,6 +75,16 @@ class Core(commands.Cog):
             await ctx.send(f'** Reloaded: ** {cog}')
             await self.bot.get_channel(self.masterLogger).send(f'** Reloaded: ** {cog}')
 
+    @commands.command(name='leave')
+    @commands.is_owner()
+    async def leave(self, ctx, *, guild_id: int):
+        _guild = self.bot.get_guild(guild_id)
+        if not _guild:
+            await ctx.send(f'Cannot find guild.')
+        else:
+            await _guild.leave()
+            await ctx.send(f'Left guild: {_guild.name} - {_guild.id}')
+
 
 def setup(bot):
     bot.add_cog(Core(bot))

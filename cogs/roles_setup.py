@@ -18,7 +18,6 @@ class Roles(commands.Cog):
         self.help = Help()
         self.db = Database()
         self.masterLogger = common.getMasterLog()
-        print("here initialized roles")
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
