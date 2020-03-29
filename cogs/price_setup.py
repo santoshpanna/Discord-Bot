@@ -38,7 +38,8 @@ class Reddit(commands.Cog):
     @tasks.loop(hours = 168.0)
     async def cleaner(self): 
         # self.db.dealsCleaner(self.bot)
-        await self.bot.get_channel(self.masterLogger).send(f"cleaned deals.")
+        # await self.bot.get_channel(self.masterLogger).send(f"cleaned deals.")
+        pass
 
     @commands.group(pass_context=True)
     async def pricetracker(self, ctx):

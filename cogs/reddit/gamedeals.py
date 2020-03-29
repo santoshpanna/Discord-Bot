@@ -59,8 +59,9 @@ class GameDeals:
             # id container
             id = None
 
-            # post log in masterlogger
-            await bot.get_channel(masterLogger).send(f"scraped {subreddit}.")
+            if common.getEnvironment() == 'dev':
+                # post log in masterlogger
+                await bot.get_channel(masterLogger).send(f"scraped {subreddit}.")
 
             # iterate through posts
             for post in posts:

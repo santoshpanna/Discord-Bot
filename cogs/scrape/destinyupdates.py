@@ -86,9 +86,9 @@ class DestinyUpdates:
             status = db.upsertPatchnotes(posts)
             if status == common.STATUS.INSERTED:
                 updates.append(posts)
-            elif status == common.STATUS.UPDATED:
+            elif status == common.STATUS.REDUNDANT:
                 break
-            elif status == common.STATUS.FAIL.UPDATE or status == common.STATUS.FAIL.INSERT:
+            else:
                 await bot.get_channel(masterLogger).send(f"**Scrape Error - Destiny 2 Updates**: id = {posts['id']}.")
 
         # returns list in ascending order

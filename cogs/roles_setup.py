@@ -105,7 +105,7 @@ class Roles(commands.Cog):
                     # get managed role
                     if _role.managed and _role.members[0].id == self.bot.user.id:
                         # add bots role to view channel permission
-                        await ctx.channel.set_permissions(_role, view_channel=True, send_messages=True)
+                        await ctx.channel.set_permissions(_role, view_channel=True, send_messages=True, embed_links=True)
 
             # update role permissions
             await ctx.channel.set_permissions(ctx.guild.default_role, **dict(discord.Permissions.none()))
@@ -161,6 +161,15 @@ class Roles(commands.Cog):
                 await ctx.channel.category.set_permissions(role, read_messages=True,  send_messages=True)
                 await ctx.channel.category.set_permissions(mod_role, read_messages=True,  send_messages=True)
                 for channel in ctx.channel.category.channels:
+                    # check if channel where bot services are enabled
+                    service = getServiceByChannel(ctx.guild.id, channel.id)
+                    if service:
+                        # service is activate
+                        for _role in self.bot.get_guild(guild.id).roles:
+                            # get managed role
+                            if _role.managed and _role.members[0].id == self.bot.user.id:
+                                # add bots role to view channel permission
+                                await ctx.channel.set_permissions(_role, view_channel=True, send_messages=True, embed_links=True)
                     await channel.edit(sync_permissions=True)
 
                 # post a log in log channel

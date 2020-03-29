@@ -322,8 +322,9 @@ class Database:
     def upsertPatchnotes(self, data):
         patch = self.getPatchnotes(data)
         if patch:
-            count = self.db.patchnotes.update_one({'_id': patch['_id']}, {'$set': data}).modified_count
-            return self.STATUS.SUCCESS.UPDATED if count > 0 else self.STATUS.FAIL.UPDATE
+            return self.STATUS.REDUNDANT
+            # count = self.db.patchnotes.update_one({'_id': patch['_id']}, {'$set': data}).modified_count
+            # return self.STATUS.SUCCESS.UPDATED if count > 0 else self.STATUS.FAIL.UPDATE
         else:
             status = self.db.patchnotes.insert_one(data).acknowledged
             return self.STATUS.SUCCESS.INSERTED if status else self.STATUS.FAIL.INSERT

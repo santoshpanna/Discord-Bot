@@ -18,8 +18,8 @@ class STATUS(Enum):
     FAIL = [INSERT, UPDATE, DELETE, NOT_FOUND, DUPLICATE, PARAMETER]
     SUCCESS = 1
     REDUNDANT = 2
-    INSERTED = 2
-    UPDATED = 2
+    INSERTED = 3
+    UPDATED = 4
 
 
 # time <- str to parsed time
