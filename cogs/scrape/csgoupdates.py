@@ -16,6 +16,9 @@ class CsgoUpdates:
         # request the page
         req = requests.get(self.url)
 
+        # get service from database
+        service = db.getService("csgoupdates")
+
         if common.getEnvironment() == 'dev':
             # post log in logging channel
             await bot.get_channel(masterLogger).send(f"**Scraped**: CSGO Updates.")
@@ -54,6 +57,7 @@ class CsgoUpdates:
 
             posts['id'] = posts['date']
             posts['service_name'] = 'csgoupdates'
+            posts['service_id'] = str(service['_id'])
             status = db.upsertPatchnotes(posts)
             if status == common.STATUS.INSERTED:
                 updates.append(posts)

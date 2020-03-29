@@ -40,7 +40,7 @@ class Flipkart:
             except KeyError:
                 pass
 
-        return currency, int(price), title
+        return currency, int(price) if price else price, title
 
     def getPrice(self, url):
         url = self.cleanURL(url)

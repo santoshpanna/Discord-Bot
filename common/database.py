@@ -278,7 +278,7 @@ class Database:
         if isinstance(data, int):
             return self.db.price_deal_mapping.find({'member_id': data})
         elif isinstance(data, dict) and 'limit' in data and 'offset' in data:
-            self.db.price_deal_mapping.find().limit(data['limit']).skip(data['offset'])
+            return self.db.price_deal_mapping.find().limit(data['limit']).skip(data['offset'])
     ''' Price Alert End '''
 
     ''' Crack Watch Start '''
@@ -293,7 +293,7 @@ class Database:
     def upsertCrackwatch(self, data):
         crack = self.getCrackwatch(data)
 
-        if crack or crack != self.STATUS.FAIL.PARAMETER:
+        if crack:
             data['date_updated'] = common.getDatetimeIST()
             count = self.db.crackwatch.update_one({'_id': crack['_id']}, {'$set': data}).modified_count
             return self.STATUS.SUCCESS.UPDATED if count > 0 else self.STATUS.FAIL.UPDATE
@@ -321,7 +321,6 @@ class Database:
 
     def upsertPatchnotes(self, data):
         patch = self.getPatchnotes(data)
-        data['id'] = data['service_name'] + str(data['id'])
         if patch:
             count = self.db.patchnotes.update_one({'_id': patch['_id']}, {'$set': data}).modified_count
             return self.STATUS.SUCCESS.UPDATED if count > 0 else self.STATUS.FAIL.UPDATE

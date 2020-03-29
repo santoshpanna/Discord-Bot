@@ -16,6 +16,9 @@ class DestinyUpdates:
         # request the page
         req = requests.get(self.url)
 
+        # get service from database
+        service = db.getService("destinyupdates")
+
         if common.getEnvironment() == 'dev':
             # post log in logging channel
             await bot.get_channel(masterLogger).send(f"**Scraped**: Destiny 2 Updates.")
@@ -79,6 +82,7 @@ class DestinyUpdates:
 
             posts['id'] = posts['date']
             posts['service_name'] = 'destinyupdates'
+            posts['service_id'] = str(service['_id'])
             status = db.upsertPatchnotes(posts)
             if status == common.STATUS.INSERTED:
                 updates.append(posts)

@@ -108,9 +108,9 @@ class Roles(commands.Cog):
                         await ctx.channel.set_permissions(_role, view_channel=True, send_messages=True)
 
             # update role permissions
-            await ctx.channel.category.set_permissions(ctx.guild.default_role, **dict(discord.Permissions.none()))
-            await ctx.channel.category.set_permissions(role, read_messages=True, send_messages=True)
-            await ctx.channel.category.set_permissions(mod_role, read_messages=True, send_messages=True)
+            await ctx.channel.set_permissions(ctx.guild.default_role, **dict(discord.Permissions.none()))
+            await ctx.channel.set_permissions(role, read_messages=True, send_messages=True)
+            await ctx.channel.set_permissions(mod_role, read_messages=True, send_messages=True)
 
             # post a log in log channel
             if logChannel:
@@ -122,7 +122,7 @@ class Roles(commands.Cog):
             except Exception:
                 pass
             # add a new message to roles channel so that users can react and subscribe to roles
-            await self.bot.get_channel(rolesChannel['channel_id']).send(f'To subscribe to @{name} react with :heart:, to un-subscribe react with :broken_heart:. **{name}** give you access to {message}.')
+            await self.bot.get_channel(rolesChannel['channel_id']).send(f'To subscribe to **@{name}** react with :heart:, to un-subscribe react with :broken_heart:. **{name}** give you access to {message}.')
         else:
             # the role service was enabled in current guild
             await ctx.send("Roles channel is not initialized, please do so by issuing `!service init roles` in roles channel. Then re-issue roles command.")
@@ -173,7 +173,7 @@ class Roles(commands.Cog):
                 except Exception:
                     pass
                 # add a new message to roles channel so that users can react and subscribe to roles
-                await self.bot.get_channel(rolesChannel['channel_id']).send(f'To subscribe to @{name} react with :heart:, to un-subscribe react with :broken_heart:. **{name}** give you access to {message}.')
+                await self.bot.get_channel(rolesChannel['channel_id']).send(f'To subscribe to **@{name}** react with :heart:, to un-subscribe react with :broken_heart:. **{name}** give you access to {message}.')
             except Exception as e:
                 await ctx.send(f'Unable to change permission due to access rights.')
         else:
