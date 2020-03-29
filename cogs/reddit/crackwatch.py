@@ -18,11 +18,10 @@ class CrackWatch:
         masterlog = common.getMasterLog()
         masterlog = bot.get_channel(masterlog)
 
-        await masterlog.send(f"purging old cracks.")
+        await masterlog.send(f"**Routine**: Purge crackwatch started.")
 
-        db.cleanCrackwatch()
-
-        await masterlog.send(f"purged cracks.")
+        if db.cleanCrackwatch() == common.STATUS.SUCCESS:
+            await masterlog.send(f"**DB Purge**: Purged crackwatch successfully.")
 
     # get new results
     def getSubreddit(self, limit):
@@ -47,15 +46,20 @@ class CrackWatch:
         db = database.Database()
 
         # r/CrackWatch
-        subreddit = self.getSubreddit(30)
+        subreddit = []
+        try:
+            subreddit = self.getSubreddit(30)
+        except Exception:
+            await bot.get_channel(masterLogger).send(f"**Error - Reddit**: unable to fetch r/crackwatch")
 
         # get latest from database
         service = db.getService("crackwatch")
         if 'latest' not in service:
             service['latest'] = None
 
-        # posting log in masterlog
-        await bot.get_channel(masterLogger).send(f"scraped crackwatch.")
+        if common.getEnvironment() == 'dev':
+            # post log in logging channel
+            await bot.get_channel(masterLogger).send(f"**Scraped**: CrackWatch.")
         
         # create deque
         posts = deque()
@@ -82,8 +86,8 @@ class CrackWatch:
 
         # go through new submissions
         for i in range(len(posts)):
-            if not posts[i]['flair']:
-                await bot.get_channel(masterLogger).send(f"**error in cw [no flair]** : check {posts[i]['url']}.")
+            if not posts[i]['flair'] and common.getEnvironment() == 'dev':
+                await bot.get_channel(masterLogger).send(f"**Error in CW [no flair]** : check {posts[i]['url']}.")
             else:
                 if 'release' in posts[i]['flair'].lower():
                     posts[i]['type'] = 'crack'
@@ -94,7 +98,7 @@ class CrackWatch:
 
                 status = db.upsertCrackwatch(posts[i])
                 
-                if status == 2:
+                if status == common.STATUS.SUCCESS.INSERTED:
                     # check for release flair
                     if posts[i]['type'] == 'crack':
                         description = posts[i]['selftext']
@@ -161,6 +165,9 @@ class CrackWatch:
                         # sleep for 1 second
                         await asyncio.sleep(1)
 
+                if status == common.STATUS.FAIL.UPDATE or status == common.STATUS.FAIL.INSERT:
+                    await bot.get_channel(masterLogger).send(f"**DB Error - crackwatch**: Failed Updated/Insert for id = {posts[i]['id']}.")
+
         # update database
         data = {}
         data["name"] = "crackwatch"
@@ -168,7 +175,23 @@ class CrackWatch:
             data["lastposted"] = common.getDatetimeIST()
             data["latest"] = id
 
-        db.updateService(data)
+        status = db.upsertService(data)
+        if status == common.STATUS.SUCCESS.INSERTED:
+            await bot.get_channel(masterLogger).send(f"**Created Service**: {data['name']}.")
+        elif status == common.STATUS.FAIL.INSERT:
+            await bot.get_channel(masterLogger).send(f"**DB Insert Error - Service**: {data['name']}.")
+        elif status == common.STATUS.FAIL.UPDATE:
+            await bot.get_channel(masterLogger).send(f"**DB Update Error - Service**: {data['name']}.")
+        else:
+            pass
 
         data["name"] = "repacknews"
-        db.updateService(data)
+        status = db.upsertService(data)
+        if status == common.STATUS.SUCCESS.INSERTED:
+            await bot.get_channel(masterLogger).send(f"**Created Service**: {data['name']}.")
+        elif status == common.STATUS.FAIL.INSERT:
+            await bot.get_channel(masterLogger).send(f"**DB Insert Error - Service**: {data['name']}.")
+        elif status == common.STATUS.FAIL.UPDATE:
+            await bot.get_channel(masterLogger).send(f"**DB Update Error - Service**: {data['name']}.")
+        else:
+            pass

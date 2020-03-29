@@ -2,7 +2,8 @@ from discord.ext import commands
 from datetime import datetime
 from .csgo import server_status
 from common import common
-import requests
+from common.database import Database
+import requests, humanize
 from requests.auth import HTTPDigestAuth
 import discord, platform, psutil
 from .helpers.helpmaker import Help
@@ -22,7 +23,23 @@ class Status(commands.Cog):
     @commands.group(pass_context=True)
     async def status(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send(embed=self.help.make(ctx.author.name, 'status', None, self.groupedCommands, None))
+            db = Database()
+
+            embed = discord.Embed(
+                title='Bot Status'
+            )
+
+            counts = db.getCountEstimates()
+            status = db.getStatus()
+
+            embed.add_field(name="Bot Name", value="[Shinigami]", inline=False)
+            embed.add_field(name="Bot Uptime", value=f"{humanize.naturaldelta(datetime.now() - status['botStartTime'])}", inline=False)
+            embed.add_field(name="Current tracked game deals", value=f"{counts['gamedeals']}", inline=False)
+            embed.add_field(name="Current tracked game cracks", value=f"{counts['cracks']}", inline=False)
+            embed.add_field(name="Current tracked game repacks", value=f"{counts['repacks']}", inline=False)
+            embed.add_field(name="Bot Source", value=f"[https://github.com/santoshpanna/Discord-Bot](github.com)", inline=False)
+
+            await ctx.send(embed=embed)
 
     @status.command()
     async def help(self, ctx):
@@ -44,16 +61,12 @@ class Status(commands.Cog):
         embed.add_field(name="Python Version", value=platform.python_version(), inline=False)
         embed.add_field(name="OS", value=platform.platform(), inline=False)
 
-        bt = datetime.now() - datetime.fromtimestamp(psutil.boot_time())
-        hours, remainder = divmod(bt.total_seconds(), 3600)
-        minutes, seconds = divmod(remainder, 60)
-
-        embed.add_field(name="Uptime", value=f'{int(hours)} hours, {int(minutes)} mins, {int(seconds)} seconds', inline=False)
+        embed.add_field(name="Server Uptime", value=f'{humanize.naturaldelta(datetime.now() - datetime.fromtimestamp(psutil.boot_time()))}', inline=False)
         embed.add_field(name="CPU", value=f'{psutil.cpu_percent()}% | Physical [{psutil.cpu_count(logical=False)}] | Logical [{psutil.cpu_count(logical=True)}]', inline=False)
         embed.add_field(name="RAM", value=f'{psutil.virtual_memory().percent}% | {round(psutil.virtual_memory().total / (1024.0 **3))} GB', inline=False)
 
-        apires = requests.get(config['COMMON']['api.url']).json()
-        if apires['status'] == 1:
+        api_res = requests.get(config['COMMON']['api.url']).json()
+        if api_res['status'] == 1:
             embed.add_field(name="API Server", value='online', inline=False)
         else:
             embed.add_field(name="API Server", value='offline', inline=False)
@@ -78,7 +91,7 @@ class Status(commands.Cog):
     async def set(self, ctx, status: str):
         # subcommand to set the current bot status
         await self.bot.change_presence(status=discord.Status.idle, activity=discord.CustomActivity(name=status))
-        await self.bot.get_channel(self.masterLog).send(f"changed status to {status}")
+        await self.bot.get_channel(self.masterLog).send(f"**Changed status**: To {status}")
 
     @status.command()
     async def csgo(self, ctx):

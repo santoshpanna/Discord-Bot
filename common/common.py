@@ -3,8 +3,23 @@ from datetime import datetime
 import pytz
 from dateutil.tz import tz
 from hashids import Hashids
+from enum import Enum
 
 dtf_ist = "%d:%m:%Y %H:%M:%S"
+
+
+class STATUS(Enum):
+    PARAMETER = -6
+    NOT_FOUND = -5
+    DUPLICATE = -4
+    DELETE = -3
+    UPDATE = -2
+    INSERT = -1
+    FAIL = [INSERT, UPDATE, DELETE, NOT_FOUND, DUPLICATE, PARAMETER]
+    SUCCESS = 1
+    REDUNDANT = 2
+    INSERTED = 3
+    UPDATED = 4
 
 
 # time <- str to parsed time
@@ -59,8 +74,20 @@ def getServiceList():
     service['crackwatch'] = 'Game crack news'
     service['repacknews'] = 'Game repack news'
     service['gamedeals'] = 'Game deal news'
+    service['roles'] = 'Automatic role allocation service'
     service['logging'] = 'Logging service for your guild'
     return service
+
+
+def getCommands():
+    commands = []
+    commands.append('service')
+    commands.append('status')
+    commands.append('mod')
+    commands.append('fun')
+    commands.append('pricetracker')
+    commands.append('roles')
+    return commands
 
 
 def getUID(id):

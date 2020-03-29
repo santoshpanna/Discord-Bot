@@ -41,7 +41,7 @@ class Moderation(commands.Cog):
 
         logChannel = guild.getLogChannel(ctx.message.guild.id)
         if logChannel:
-            await self.bot.get_channel(logChannel["channel_id"]).send(f'{ctx.message.author.name} deleted {number} messages.')
+            await self.bot.get_channel(logChannel["channel_id"]).send(f'**Message Delete**: {ctx.message.author.name} deleted {number} messages from {ctx.channel.name}.')
 
 
 def setup(bot):

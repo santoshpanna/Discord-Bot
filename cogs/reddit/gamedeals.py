@@ -50,13 +50,18 @@ class GameDeals:
                 service['latest'] = None
 
             # get the latest submissions
-            posts = self.getSubreddit(subreddit, 30)
+            posts = []
+            try:
+                posts = self.getSubreddit(subreddit, 30)
+            except Exception:
+                await bot.get_channel(masterLogger).send(f"**Error** : unable to fetch r/{subreddit}")
 
             # id container
             id = None
 
-            # post log in masterlogger
-            await bot.get_channel(masterLogger).send(f"scraped {subreddit}.")
+            if common.getEnvironment() == 'dev':
+                # post log in masterlogger
+                await bot.get_channel(masterLogger).send(f"scraped {subreddit}.")
 
             # iterate through posts
             for post in posts:
@@ -100,7 +105,15 @@ class GameDeals:
                 if id:
                     data["latest"] = id
 
-            db.updateService(data)
+            status = db.upsertService(data)
+            if status == common.STATUS.SUCCESS.INSERTED:
+                await bot.get_channel(masterLogger).send(f"**Created Service**: {data['name']}.")
+            elif status == common.STATUS.FAIL.INSERT:
+                await bot.get_channel(masterLogger).send(f"**DB Insert Error - Service**: {data['name']}.")
+            elif status == common.STATUS.FAIL.UPDATE:
+                await bot.get_channel(masterLogger).send(f"**DB Update Error - Service**: {data['name']}.")
+            else:
+                pass
 
         # send the final deque for posting
         await self.send(enriched_post, bot)
@@ -111,23 +124,24 @@ class GameDeals:
 
         # go through new submissions
         for post in posts:
-            status = db.upsertDeal(post)
+            status = db.upsertGameDeal(post)
 
             # 1 = updated, 2 = created, -1 = error in update/inserting
             channels = guild.getChannels('gamedeals')
             for channel in channels:
                 # the deal already exists
-                if status == 1:
+                if status == common.STATUS.SUCCESS.UPDATED:
                     # price check for steam games
                     if 'steampowered.com' in post['url']:
                         try:
-                            existingDeal = db.getDeal(post)
-                            newprice = self.ssf.getPrice(url=post['url'])
-                            newprice = newprice['final'] if newprice else 9223372036854775806
+                            existingDeal = db.getGameDeal(post)
+                            new_price = self.ssf.getPrice(url=post['url'])
+                            new_price = new_price['final'] if new_price else 9223372036854775806
+                                                         
                             if 'price' in existingDeal:
-                                oldprice = existingDeal['price']
+                                old_price = existingDeal['price']
                                 # if new price is less than older price post the deal
-                                if int(newprice) < int(oldprice):
+                                if int(new_price) < int(old_price):
                                     await self.steam.post(bot, channel, post)
                         # can't compare price, so leave the deal
                         except InvalidArgument as e:
@@ -138,7 +152,7 @@ class GameDeals:
                     #     await self.steam.post(bot, channel, post)
 
                 # the deal is a new one
-                elif status == 2:
+                elif status == common.STATUS.SUCCESS.INSERTED:
                     # special handler for steam
                     if 'steampowered.com' in post['url']:
                         await self.steam.post(bot, channel, post)
@@ -151,4 +165,4 @@ class GameDeals:
                 # there has been error updating or inserting deal
                 else:
                     # log it in master log
-                    bot.get_channel(self.masterLogger).send(f"error updating/inserting {post['url']}.")
+                    bot.get_channel(self.masterLogger).send(f"**DB Error**: Failed Updating/Inserting {post['id']}.")

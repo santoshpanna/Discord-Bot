@@ -13,16 +13,15 @@ class DestinyUpdates:
         db = database.Database()
         masterLogger = common.getMasterLog()
 
-        # destiny updates
-        service = db.getService("destinyupdates")
-        if 'latest' not in service:
-            service['latest'] = None
-
         # request the page
         req = requests.get(self.url)
 
-        # post log in logging channel
-        await bot.get_channel(masterLogger).send(f"scraped destiny 2 updates.")
+        # get service from database
+        service = db.getService("destinyupdates")
+
+        if common.getEnvironment() == 'dev':
+            # post log in logging channel
+            await bot.get_channel(masterLogger).send(f"**Scraped**: Destiny 2 Updates.")
 
         # return variable
         updates = []
@@ -56,7 +55,7 @@ class DestinyUpdates:
             try:
                 # the date is older than 1 day
                 posts['date'] = str(datetime.strptime(posts['date'], "%b %d, %Y"))[:-9]
-            except:
+            except Exception:
                 # convert relative hours to date
                 posts['date'] = posts['date'].replace("h", "")
                 delta = timedelta(hours=int(posts['date']))
@@ -81,18 +80,23 @@ class DestinyUpdates:
 
             posts['patchnotes'] = w3lib.html.remove_tags(posts['patchnotes'])
 
-            # discord embed description limit
-            if len(posts['patchnotes']) >= 2048:
-                posts['patchnotes'] = posts['patchnotes'][:2040]+"\n..."
-
-            # check if the there are any new updates
-            if posts['date'] == service["latest"]:
+            posts['id'] = posts['date']
+            posts['service_name'] = 'destinyupdates'
+            posts['service_id'] = str(service['_id'])
+            status = db.upsertPatchnotes(posts)
+            if status == common.STATUS.INSERTED:
+                updates.append(posts)
+            elif status == common.STATUS.REDUNDANT:
                 break
             else:
-                updates.append(posts)
+                await bot.get_channel(masterLogger).send(f"**Scrape Error - Destiny 2 Updates**: id = {posts['id']}.")
 
         # returns list in ascending order
         for update in updates[::-1]:
+            # discord embed description limit
+            if len(update['patchnotes']) >= 2048:
+                update['patchnotes'] = update['patchnotes'][:2040] + "\n..."
+
             # send an embed message
             embed=discord.Embed(
                 title=update["title"],
@@ -119,4 +123,12 @@ class DestinyUpdates:
             data["lastposted"] = common.getDatetimeIST()
             data["latest"] = updates[len(updates)-1]["date"]
 
-        db.updateService(data)
+        status = db.upsertService(data)
+        if status == common.STATUS.SUCCESS.INSERTED:
+            await bot.get_channel(masterLogger).send(f"**Created Service**: {data['name']}.")
+        elif status == common.STATUS.FAIL.INSERT:
+            await bot.get_channel(masterLogger).send(f"**DB Insert Error - Service**: {data['name']}.")
+        elif status == common.STATUS.FAIL.UPDATE:
+            await bot.get_channel(masterLogger).send(f"**DB Update Error - Service**: {data['name']}.")
+        else:
+            pass

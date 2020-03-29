@@ -77,7 +77,7 @@ class Amazon:
             # get member, mapping and service
             url = self.cleanURL(url)
             member = self.db.getMember(ctx)
-            deals_by_member = self.db.getPriceAlerts(ctx.author.id)
+            deals_by_member = self.db.getPriceAlert(ctx.author.id)
 
             service = self.db.getService('amazon')
 
@@ -109,7 +109,7 @@ class Amazon:
                     elif alert_price.isnumeric():
                         alertAt = int(alert_price)
                     else:
-                        await ctx.send(f'{ctx.author.name} alertprice is invalid, please check and re-issue the command.')
+                        await ctx.send(f'{ctx.author.name} alert price is invalid, please check and re-issue the command.')
 
                     if alertAt:
                         data = {}
@@ -119,17 +119,19 @@ class Amazon:
                         data['url'] = url
                         data['uuid'] = common.getUID(ctx.author.id)
                         data['alert_at'] = int(alert_price)
-                        # u"\u00A4" is symbol for unknow currency
+                        # u"\u00A4" is symbol for unknown currency
                         if not price:
                             data['currency'] = u"\u00A4"
                         else:
                             data['title'] = price['title']
                             data['currency'] = price['currency']
-                        status = self.db.insertPriceDeal(data)
+                        status = self.db.insertPriceAlert(data)
 
-                        if status:
+                        if status == common.STATUS.SUCCESS:
                             await ctx.send(f'{ctx.author.name} - {url} is successfully subscribed for price tracking.')
+                        elif status == common.STATUS.FAIL.DUPLICATE:
+                            await ctx.send(f'{ctx.author.name} - {url} is already subscribed for price tracking.')
                         else:
                             await ctx.send(f'{ctx.author.name} - due to technical error we cannot track price right now.')
-                            await self.bot.get_channel(self.masterLog).send(f'**error amazon price insert** url = {url}, author = {ctx.author.id}, {ctx.author.name} from {ctx.guild.name} in {ctx.channel.name}')
+                            await bot.get_channel(self.masterLog).send(f'**error amazon price insert** url = {url}, author = {ctx.author.id}, {ctx.author.name} from {ctx.guild.name} in {ctx.channel.name}')
 

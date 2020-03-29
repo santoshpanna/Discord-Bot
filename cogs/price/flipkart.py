@@ -40,7 +40,7 @@ class Flipkart:
             except KeyError:
                 pass
 
-        return currency, int(price), title
+        return currency, int(price) if price else price, title
 
     def getPrice(self, url):
         url = self.cleanURL(url)
@@ -71,7 +71,8 @@ class Flipkart:
             # get member, mapping and service
             url = self.cleanURL(url)
             member = self.db.getMember(ctx)
-            deals_by_member = self.db.getPriceAlerts(ctx.author.id)
+            
+            deals_by_member = self.db.getPriceAlert(ctx.author.id)
 
             service = self.db.getService('flipkart')
 
@@ -116,12 +117,14 @@ class Flipkart:
                         else:
                             data['title'] = price['title']
                             data['currency'] = price['currency']
-                        status = self.db.insertPriceDeal(data)
+                            
+                        status = self.db.insertPriceAlert(data)
 
-                        if status:
+                        if status == common.STATUS.SUCCESS:
                             await ctx.send(f'{ctx.author.name} - {url} is successfully subscribed for price tracking.')
+                        elif status == common.STATUS.FAIL.DUPLICATE:
+                            await ctx.send(f'{ctx.author.name} - {url} is already subscribed for price tracking.')
                         else:
                             await ctx.send(f'{ctx.author.name} - due to technical error we cannot track price right now.')
-                            await self.bot.get_channel(self.masterLog).send(f'**error amazon price insert** url = {url}, author = {ctx.author.id}, {ctx.author.name} from {ctx.guild.name} in {ctx.channel.name}')
-
+                            await bot.get_channel(self.masterLog).send(f'**error flipkart price insert** url = {url}, author = {ctx.author.id}, {ctx.author.name} from {ctx.guild.name} in {ctx.channel.name}')
 

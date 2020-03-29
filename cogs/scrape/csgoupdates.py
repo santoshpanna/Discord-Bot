@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
-import requests, discord, asyncio
+import requests, discord, asyncio, w3lib.html
 from ..helpers import guild
 from common import common, database
 
@@ -13,16 +13,15 @@ class CsgoUpdates:
         db = database.Database()
         masterLogger = common.getMasterLog()
 
-        # csgo updates
-        service = db.getService("csgoupdates")
-        if 'latest' not in service:
-            service['latest'] = None
-
         # request the page
         req = requests.get(self.url)
 
-        # post log in logging channel
-        await bot.get_channel(masterLogger).send(f"scraped csgo updates.")
+        # get service from database
+        service = db.getService("csgoupdates")
+
+        if common.getEnvironment() == 'dev':
+            # post log in logging channel
+            await bot.get_channel(masterLogger).send(f"**Scraped**: CSGO Updates.")
         
         # return variable
         updates = []
@@ -31,7 +30,7 @@ class CsgoUpdates:
         soup = BeautifulSoup(req.content, 'html5lib')
 
         # post container:
-        container = soup.find('div', attrs = {'id':'post_container'})
+        container = soup.find('div', attrs = {'id': 'post_container'})
 
         # iterating though each post
         for post in container.findAll('div', attrs = {'class':'inner_post'}):
@@ -47,27 +46,32 @@ class CsgoUpdates:
             posts['patchnotes'] = []
             for p in post.findAll('p'):
                 try:
-                    if p.attrs['class'] :
+                    if p.attrs['class']:
                         pass
                 except KeyError:
                     # remove html tags
-                    posts['patchnotes'].append(str(p).replace("<br/>","").replace("<p>", "").replace("</p>", ""))
+                    posts['patchnotes'].append(str(p).replace("<br/>", "").replace("<p>", "").replace("</p>", ""))
 
             posts['patchnotes'] = "\n\n".join(posts['patchnotes'])
+            posts['patchnotes'] = w3lib.html.remove_tags(posts['patchnotes'])
 
-            # discord embed description limit
-            if len(posts['patchnotes']) >= 2048:
-                posts['patchnotes'] = posts['patchnotes'][:2040]+"\n..."
-
-            # check if the there are any new updates
-            if posts['date'] == service["latest"]:
+            posts['id'] = posts['date']
+            posts['service_name'] = 'csgoupdates'
+            posts['service_id'] = str(service['_id'])
+            status = db.upsertPatchnotes(posts)
+            if status == common.STATUS.INSERTED:
+                updates.append(posts)
+            elif status == common.STATUS.REDUNDANT:
                 break
             else:
-                # append data
-                updates.append(posts)
+                await bot.get_channel(masterLogger).send(f"**Scrape Error - CSGO Updates**: id = {posts['id']}.")
 
         # process list in ascending order
         for update in updates[::-1]:
+            # discord embed description limit
+            if len(update['patchnotes']) >= 2048:
+                update['patchnotes'] = update['patchnotes'][:2040] + "\n..."
+
             # send an embed message
             embed=discord.Embed(
                 title=update["title"],
@@ -95,5 +99,13 @@ class CsgoUpdates:
             data["lastposted"] = common.getDatetimeIST()
             data["latest"] = updates[0]["date"]
 
-        db.updateService(data)
+        status = db.upsertService(data)
+        if status == common.STATUS.SUCCESS.INSERTED:
+            await bot.get_channel(masterLogger).send(f"**Created Service**: {data['name']}.")
+        elif status == common.STATUS.FAIL.INSERT:
+            await bot.get_channel(masterLogger).send(f"**DB Insert Error - Service**: {data['name']}.")
+        elif status == common.STATUS.FAIL.UPDATE:
+            await bot.get_channel(masterLogger).send(f"**DB Update Error - Service**: {data['name']}.")
+        else:
+            pass
    

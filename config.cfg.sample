@@ -22,6 +22,7 @@ name =
 
 [DISCORD]
 token = 
+prefix = 
 
 [STEAM]
 steam.api = 
