@@ -1,5 +1,7 @@
 from common.database import Database
 
+db = Database()
+
 
 def getOwnerInfo(member):
     data = {}
@@ -51,24 +53,20 @@ def updateGuidInfo(guild):
     data["large"] = guild.large
     data["member_count"] = guild.member_count
     data["created_at"] = guild.created_at
-    db = Database()
     db.upsertGuidInfo(data)
 
 
-def getLogChannel(guildid):
-    db = Database()
+def getLogChannel(guild_id):
     query = {}
-    query["guild_id"] = guildid
+    query["guild_id"] = guild_id
     service = db.getService("logging")
     query["service_ids"] = str(service["_id"])
-    return db.getChannelByService(query)
+    return db.getChannelByQuery(query)
 
 
-def getChannels(servicename):
-    db = Database()
-
+def getChannels(service_name):
     # get all the guilds with required service
-    guilds = db.getGuildsByService(servicename)
+    guilds = db.getGuildsByService(service_name)
 
     # container
     channels = []
@@ -77,7 +75,7 @@ def getChannels(servicename):
     if guilds:
         for guild in guilds:
             # get the service id and information
-            service = db.getService(servicename)
+            service = db.getService(service_name)
             # form search query
             query = {}
             query["guild_id"] = guild["id"]
@@ -85,21 +83,27 @@ def getChannels(servicename):
             gcs = db.getChannelsByService(query)
 
             for channel in gcs:
-                service = db.getService("logging")
-                query["service_ids"] = str(service["_id"])
-                logging = db.getChannelsByService(query)
+                logging = getLogChannel(query["guild_id"])
                 if logging:
-                    channel["logging"] = logging.next()["channel_id"]
+                    channel["logging"] = logging["channel_id"]
                 # append to get the final list
                 channels.append(channel)
 
     return channels
 
 
-def getChannelByGuild(guildid, servicename):
-    db = Database()
+def getChannelByService(guild_id, service_name):
     query = {}
-    query["guild_id"] = guildid
-    service = db.getService(servicename)
+    query["guild_id"] = guild_id
+    service = db.getService(service_name)
     query["service_ids"] = str(service["_id"])
-    return db.getChannelByService(query)
+    return db.getChannelByQuery(query)
+
+
+def getServiceByChannel(guild_id, channel_id):
+    query = {}
+    query["channel_id"] = channel_id
+    if guild_id:
+        query["guild_id"] = guild_id
+    return db.getChannelByQuery(query)
+

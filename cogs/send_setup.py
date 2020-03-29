@@ -1,7 +1,7 @@
 from discord.ext import commands
 from .helpers.steam import Steam
 from .helpers.helpmaker import Help
-from .helpers.guild import getChannelByGuild
+from .helpers.guild import getChannelByService
 from common.database import Database
 
 
@@ -28,7 +28,7 @@ class Send(commands.Cog):
 
     @send.command()
     async def deal(self, ctx, url: str):
-        channel = getChannelByGuild(ctx.guild.id, 'gamedeals')
+        channel = getChannelByService(ctx.guild.id, 'gamedeals')
 
         if not channel:
             await ctx.send(f"GameDeals service is not enabled in your guild.")
@@ -41,7 +41,7 @@ class Send(commands.Cog):
 
     @send.command()
     async def crack(self, ctx, url: str):
-        channel = getChannelByGuild(ctx.guild.id, 'crackwatch')
+        channel = getChannelByService(ctx.guild.id, 'crackwatch')
 
         if not channel:
             await ctx.send(f"Crack News service is not enabled in your guild.")
@@ -54,7 +54,7 @@ class Send(commands.Cog):
 
     @send.command()
     async def repack(self, ctx, url: str):
-        channel = getChannelByGuild(ctx.guild.id, 'repacknews')
+        channel = getChannelByService(ctx.guild.id, 'repacknews')
 
         if not channel:
             await ctx.send(f"Repack News service is not enabled in your guild.")

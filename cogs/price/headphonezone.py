@@ -72,7 +72,7 @@ class Headphonezone:
             except AttributeError:
                 return None
             finally:
-                price['currency'], price['regular'], price['title'] = self.filterPrice(script, url_query_parameter(url, 'variant'))
+                price['currency'], price['regular'], price['title'] = self.filterPrice(scripts, url_query_parameter(url, 'variant'))
             
             return price
 
@@ -82,7 +82,7 @@ class Headphonezone:
             # get member, mapping and service
             #url = self.cleanURL(url)
             member = self.db.getMember(ctx)
-            deals_by_member = self.db.getPriceAlerts(ctx.author.id)
+            deals_by_member = self.db.getPriceAlert(ctx.author.id)
 
             service = self.db.getService('headphonezone')
 
@@ -127,12 +127,12 @@ class Headphonezone:
                         else:
                             data['title'] = price['title']
                             data['currency'] = price['currency']
-                        status = self.db.insertPriceDeal(data)
+                        status = self.db.insertPriceAlert(data)
 
-                        if status:
+                        if status == common.STATUS.SUCCESS:
                             await ctx.send(f'{ctx.author.name} - {url} is successfully subscribed for price tracking.')
+                        elif status == common.STATUS.FAIL.DUPLICATE:
+                            await ctx.send(f'{ctx.author.name} - {url} is already subscribed for price tracking.')
                         else:
                             await ctx.send(f'{ctx.author.name} - due to technical error we cannot track price right now.')
-                            await self.bot.get_channel(self.masterLog).send(f'**error amazon price insert** url = {url}, author = {ctx.author.id}, {ctx.author.name} from {ctx.guild.name} in {ctx.channel.name}')
-
-
+                            await bot.get_channel(self.masterLog).send(f'**error flipkart price insert** url = {url}, author = {ctx.author.id}, {ctx.author.name} from {ctx.guild.name} in {ctx.channel.name}')

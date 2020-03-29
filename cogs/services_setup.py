@@ -2,11 +2,11 @@ import discord
 from discord.ext import commands
 from common.database import Database
 from .core_setup import Core
-from common.common import getServiceList
+from common.common import getServiceList, STATUS, getMasterLog
+from .helpers.guild import getLogChannel
 
 
 class Service(commands.Cog):
-    steam_api_key = None
 
     def __init__(self, bot):
         self.bot = bot
@@ -49,7 +49,7 @@ class Service(commands.Cog):
         servicelist = getServiceList()
 
         flag = False
-        # check if servicename entered is real service or not
+        # check if service name entered is real service or not
         for service in servicelist:
             if service == name:
                 flag = True
@@ -62,15 +62,18 @@ class Service(commands.Cog):
             data['channel_name'] = ctx.channel.name
             data['service_name'] = name
             res = self.db.createChannelMapping(data)
-            if res == 1:
-                await ctx.send(f"service ***{name}*** is now activated.")
-            elif res == 2:
-                await ctx.send(f"service ***{name}*** is already active for this channel.")
+            if res == STATUS.SUCCESS:
+                await ctx.send(f'Service *{name}* is now activated.')
+                logging = getLogChannel(ctx.guild.id)
+                if logging:
+                    await self.bot.get_channel(logging).send(f'**Service activated**: *{ctx.author.name}* activated service *{name}* for channel *{ctx.channel.name}*.')
+            elif res == STATUS.REDUNDANT:
+                await ctx.send(f'Service *{name}* is already active for this channel.')
             else:
-                await ctx.send(f"service ***{name}*** could not be activated for this channel.")
-
+                await ctx.send(f'Service *{name}* could not be activated for this channel.')
+        # service doesn't exist
         else:
-            await ctx.send(f"{name} service not found, see `!help service` for list of available services.")
+            await ctx.send(f'Service*{name}* not found, see `!help service` for list of available services.')
 
     @service.command()
     @commands.has_permissions(manage_guild=True)
@@ -79,7 +82,7 @@ class Service(commands.Cog):
         servicelist = getServiceList()
 
         flag = False
-        # check if servicename entered is real service or not
+        # check if service name entered is real service or not
         for service in servicelist:
             if service == name:
                 flag = True
@@ -92,24 +95,27 @@ class Service(commands.Cog):
             data['channel_name'] = ctx.channel.name
             data['service_name'] = name
             res = self.db.deleteChannelMapping(data)
-            if res == 1:
-                await ctx.send(f"service ***{name}*** is now deactivated.")
-            elif res == 2:
-                await ctx.send(f"service ***{name}*** is already deactivated for this channel.")
+            if res == STATUS.SUCCESS:
+                await ctx.send(f'service *{name}* is now deactivated.')
+                logging = getLogChannel(ctx.guild.id)
+                if logging:
+                    await self.bot.get_channel(logging).send(f'**Service de-activated**: *{ctx.author.name}* de-activated service *{name}* for channel *{ctx.channel.name}*.')
+            elif res == STATUS.FAIL.NOT_FOUND:
+                await ctx.send(f'Service *{name}* is already deactivated for this channel.')
             else:
-                await ctx.send(f"service ***{name}*** could not be deactivated for this channel.")
-
+                await ctx.send(f'Service *{name}* could not be deactivated for this channel.')
         else:
-            await ctx.send(f"{name} service not found, see `!help service` for list of available services.")
+            await ctx.send(f'Service *{name}* not found, see `!help service` for list of available services.')
 
     @service.command()
     @commands.is_owner()
     async def register(self, ctx, name: str, display_name: str):
-        status = self.db.registerService(name, display_name)
-        if status:
-            await ctx.send(f"service **{name}** is registered.")
+        data = {'name': name, 'service_name': display_name}
+        status = self.db.upsertService(data)
+        if status == STATUS.SUCCESS:
+            await self.bot.get_channel(getMasterLog()).send(f'**Service created**: *{name}* with display name as *{display_name}*.')
         else:
-            await ctx.send(f"failed to register **{name}**.")
+            await self.bot.get_channel(getMasterLog()).send(f'**Error**: Unable to create service *{name}* with display name as *{display_name}*.')
 
 
 def setup(bot):

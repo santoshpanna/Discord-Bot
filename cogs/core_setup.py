@@ -47,10 +47,10 @@ class Core(commands.Cog):
         try:
             self.bot.load_extension(normalize(cog))
         except Exception as e:
-            await self.bot.get_channel(self.masterLogger).send(f'** ERROR loading {cog}: ** {type(e).__name__}')
+            await self.bot.get_channel(self.masterLogger).send(f'**ERROR loading {cog}: ** {type(e).__name__}')
         else:
             await ctx.send(f'** Loaded: ** {cog}')
-            await self.bot.get_channel(self.masterLogger).send(f'** Loaded: ** {cog}')
+            await self.bot.get_channel(self.masterLogger).send(f'**Loaded: ** {cog}')
 
     @commands.command(name='unload')
     @commands.is_owner()
@@ -58,10 +58,10 @@ class Core(commands.Cog):
         try:
             self.bot.unload_extension(normalize(cog))
         except Exception as e:
-            await self.bot.get_channel(self.masterLogger).send(f'** ERROR unloading {cog}: ** {type(e).__name__}')
+            await self.bot.get_channel(self.masterLogger).send(f'**ERROR unloading {cog}: ** {type(e).__name__}')
         else:
             await ctx.send(f'** Unloaded: ** {cog}')
-            await self.bot.get_channel(self.masterLogger).send(f'** Unloaded: ** {cog}')
+            await self.bot.get_channel(self.masterLogger).send(f'**Unloaded: ** {cog}')
 
     @commands.command(name='reload')
     @commands.is_owner()
@@ -70,20 +70,20 @@ class Core(commands.Cog):
             self.bot.unload_extension(normalize(cog))
             self.bot.load_extension(normalize(cog))
         except Exception as e:
-            await self.bot.get_channel(self.masterLogger).send(f'** ERROR reloading {cog}: ** {type(e).__name__}')
+            await self.bot.get_channel(self.masterLogger).send(f'**ERROR reloading {cog}: ** {type(e).__name__}')
         else:
             await ctx.send(f'** Reloaded: ** {cog}')
-            await self.bot.get_channel(self.masterLogger).send(f'** Reloaded: ** {cog}')
+            await self.bot.get_channel(self.masterLogger).send(f'**Reloaded: ** {cog}')
 
     @commands.command(name='leave')
     @commands.is_owner()
     async def leave(self, ctx, *, guild_id: int):
         _guild = self.bot.get_guild(guild_id)
         if not _guild:
-            await ctx.send(f'Cannot find guild.')
+            await self.bot.get_channel(self.masterLogger).send(f'**Leave Guild Error**: Cannot find guild.')
         else:
             await _guild.leave()
-            await ctx.send(f'Left guild: {_guild.name} - {_guild.id}')
+            await self.bot.get_channel(self.masterLogger).send(f'**Left Guild**: {_guild.name} - {_guild.id}')
 
 
 def setup(bot):

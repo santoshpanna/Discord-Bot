@@ -79,7 +79,7 @@ class Reddit(commands.Cog):
         data['member_id'] = ctx.author.id
         data['uuid'] = uuid
         status = self.db.deletePriceAlert(data)
-        if status:
+        if status == common.STATUS.SUCCESS:
             await ctx.send(f"{ctx.author.name}, you have successfully un-subscribed from pricealert for **{uuid}**.")
         else:
             await ctx.send(f"{ctx.author.name}, the id is incorrect. Use `!pricetracker list` to view your subscribed pricealerts.")
@@ -91,35 +91,35 @@ class Reddit(commands.Cog):
         data['uuid'] = uuid
         data['alert_at'] = price
 
-        status = self.db.updateAlertPrice(data)
+        status = self.db.updatePriceAlert(data)
 
-        if status == 1:
+        if status == common.STATUS.SUCCESS:
             await ctx.send(f"{ctx.author.name}, **{uuid}** has been successfully updated with alert price **{price}**.")
-        elif status == 0:
+        elif status == common.STATUS.FAIL.NOT_FOUND:
             await ctx.send(f"{ctx.author.name}, we are unable to update alert price for **{uuid}**.")
-        elif status == -1:
+        elif status == common.STATUS.FAIL.UPDATE:
             await ctx.send(f"{ctx.author.name}, we cannot find any subscription for **{uuid}**.")
-
 
     @pricetracker.command()
     async def cooldown(self, ctx, uuid:str):
         data = {}
         data['member_id'] = ctx.author.id
         data['uuid'] = uuid
+        data['alert_at'] = common.getDatetimeIST()
 
-        status = self.db.updatePriceCooldown(data)
+        status = self.db.updatePriceAlert(data)
 
-        if status == 1:
+        if status == common.STATUS.SUCCESS:
             await ctx.send(f"{ctx.author.name}, **{uuid}** cooldown has been reset.")
-        elif status == 0:
+        elif status == common.STATUS.FAIL.NOT_FOUND:
             await ctx.send(f"{ctx.author.name}, we are unable to reset cooldown for **{uuid}**.")
-        elif status == -1:
+        elif status == common.STATUS.FAIL.UPDATE:
             await ctx.send(f"{ctx.author.name}, we cannot find any subscription for **{uuid}**.")
 
     @pricetracker.command()
     async def list(self, ctx):
 
-        alerts = self.db.getPriceAlerts(ctx.author.id)
+        alerts = self.db.getPriceAlert(ctx.author.id)
 
         if alerts:
             description = f'Your current subscribed deals\n\n'
@@ -130,7 +130,6 @@ class Reddit(commands.Cog):
             await ctx.send(embed=embed)
         else:
             await ctx.send(f"{ctx.author.name} you have no active price alert subscription.")
-
 
     def createRichDeals(self, deals, deal):
         # check if url already exist in dictionary
@@ -175,7 +174,7 @@ class Reddit(commands.Cog):
         all_deals = {}
 
         # first query to get the count and initial 1000 deals
-        deals = self.db.getAllPriceDeals(data)
+        deals = self.db.getPriceAlert(data)
         for deal in deals:   
             self.createRichDeals(all_deals, deal)
 
@@ -184,9 +183,9 @@ class Reddit(commands.Cog):
         # 1st run : 1024 <= 0 + 1000
         # 2nd run : 1024 <= 1000 + 1000 # false
         count = deals.count()
-        while count >= data['limit'] and count <= (data['offset'] + data['limit']):
+        while data['limit'] <= count <= (data['offset'] + data['limit']):
             data['offset'] = data['offset'] + data['limit']
-            deals = self.db.getAllPriceDeals(data)
+            deals = self.db.getPriceAlert(data)
             for deal in deals:   
                 self.createRichDeals(all_deals, deal)
 
@@ -214,14 +213,22 @@ class Reddit(commands.Cog):
                 # iterate the members
                 for member in all_deals[key]['members']:
                     if member['currency'] == u"\u00A4":
-                        self.db.updateAlertCurrency(member, price['currency'])
+                        update_payload = {}
+                        update_payload['_id'] = all_deals[key]['_id']
+                        update_payload['member_id'] = member['id']
+                        update_payload['uuid'] = member['uuid']
+                        update_payload['currency'] = price['currency']
+                        self.db.updatePriceAlert(update_payload)
                     # if price is lower than alert price or equal to alert price, send a private message
                     if price['current'] < member['alert_at'] and common.getDatetimeIST() >= member['cooldown']:
                         self.bot.send_message(member['id'], f'Price for **{price["title"]}** has dropped and is now **{price["currency"]} {price["current"]}.00**.\nPlease update alert price by command `!pricetracker update {member["uuid"]} <new alert price>` or,\nDelete this deal by `!pricetracker delete {member["uuid"]}`\nFurther alerts for this deal is supressed for next 12 hours.\nIf you want to continue to receive in price alerts in cooldown period, issue command by `!pricetracker cooldown {member["uuid"]}`.')
                         # db update flag
                         flag = True
             if flag:
-                self.db.updatePrice(key, all_deals[key]['members'], price['current'])
+                status = self.db.updatePriceAlerts(key, price['current'])
+                if status == common.STATUS.FAIL.UPDATE:
+                    await self.bot.get_channel(self.masterLogger).send(f"**Error - Price Alert** : Bulk update error for url = {key} and price = {price['current']}.")
+
 
 def setup(bot):
     bot.add_cog(Reddit(bot))

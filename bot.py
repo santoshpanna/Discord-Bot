@@ -10,7 +10,7 @@ bot = commands.Bot(command_prefix=config['DISCORD']['prefix'])
 
 formatter = commands.HelpCommand(show_check_failure=False)
 
-modules = [
+modules_prod = [
     'cogs.status_setup',
     'cogs.core_setup',
     'cogs.moderation_setup',
@@ -25,22 +25,38 @@ modules = [
     'cogs.roles_setup'
 ]
 
+modules_dev = [
+    'cogs.status_setup',
+    'cogs.core_setup',
+    'cogs.moderation_setup',
+    'cogs.services_setup',
+    'cogs.roles_setup'
+]
+
 
 @bot.event
 async def on_ready():
-    db = database.Database()
+    # if env is not dev the load regular cogs
+    if common.getEnvironment() != 'dev':
+        db = database.Database()
 
-    db.updateBotStartTime()
+        # update bot start time
+        db.updateBotStartTime()
 
-    print(f'Logged in as {bot.user.name} - {bot.user.id}')
-    # guild
-    for guilds in bot.guilds:
-        guild.updateGuidInfo(guilds)
+        # guild
+        for guilds in bot.guilds:
+            guild.updateGuidInfo(guilds)
 
-    for module in modules:
-        bot.load_extension(module)
+        for module in modules_prod:
+            bot.load_extension(module)
+    # load cogs which are are development
+    else:
+        for module in modules_dev:
+            bot.load_extension(module)
+
     await bot.change_presence(status=discord.Status.online, activity=discord.CustomActivity(name='Testing mode >.<'))
 
-
+# remove default help
+# see cogs/core for new help
 bot.remove_command('help')
 bot.run(token)

@@ -3,8 +3,23 @@ from datetime import datetime
 import pytz
 from dateutil.tz import tz
 from hashids import Hashids
+from enum import Enum
 
 dtf_ist = "%d:%m:%Y %H:%M:%S"
+
+
+class STATUS(Enum):
+    PARAMETER = -6
+    NOT_FOUND = -5
+    DUPLICATE = -4
+    DELETE = -3
+    UPDATE = -2
+    INSERT = -1
+    FAIL = [INSERT, UPDATE, DELETE, NOT_FOUND, DUPLICATE, PARAMETER]
+    SUCCESS = 1
+    REDUNDANT = 2
+    INSERTED = 2
+    UPDATED = 2
 
 
 # time <- str to parsed time

@@ -137,9 +137,10 @@ class Steam:
                 await ctx.send(f"{ctx.message.author} your profile is not public, this might cause some problem we suggest you set your profile to public.")
 
             status = db.insertUserSteam('steam', obj)
-            if not status:
+            if status == common.STATUS.FAIL.INSERT:
                 await ctx.send(f"{ctx.message.author}, registration unsuccessful. This is internal error.")
-                masterLog = common.getMasterLog()
-                bot.get_channel(masterLog).send(f"Unable to insert csgo user {username} requested from user {ctx.message.author}.")
-            else:
+                bot.get_channel(common.getMasterLog()).send(f"**DB Insert Error**: Unable to insert csgo user {username} requested from user {ctx.message.author}.")
+            elif status == common.STATUS.SUCCESS:
                 await ctx.send(f"{ctx.message.author}, registration successful.")
+            elif status == common.STATUS.FAIL.DUPLICATE:
+                await ctx.send(f"{ctx.message.author}, you are already registered for this service.")

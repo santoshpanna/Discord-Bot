@@ -62,8 +62,8 @@ async def cleaner(bot):
     masterlog = common.getMasterLog()
     masterlog = bot.get_channel(masterlog)
 
-    await masterlog.send(f"purging old deals from gamedeals.")
+    await masterlog.send(f"**Routine**: Purge gamedeals started.")
 
-    db.cleanDeals()
+    if db.cleanGameDeal() == common.STATUS.SUCCESS:
+        await masterlog.send(f"**DB Purge**: Purged gamedeals successfully.")
 
-    await masterlog.send(f"purged gamedeals.")
