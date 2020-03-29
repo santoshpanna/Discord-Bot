@@ -29,12 +29,12 @@ class Roles(commands.Cog):
         # check if bot was the poster and check emoji for further action
         if self.bot.user.id == message.author.id and (payload.emoji.name == '❤️' or payload.emoji.name == '💔'):
             # get role from message
-            role = message.content[message.content.find('@') + 1: message.content.find(' ', message.content.find('@'))]
+            role = message.content[message.content.find('@') + 1: message.content.find('*', message.content.find('@'))]
             # check if any role was found
             if role != message.content and role != "":
                 # get guild, user and role
                 guild = self.bot.get_guild(payload.guild_id)
-                author = guild.get_member(payload.member.id)
+                author = guild.get_member(payload.user_id)
                 role = discord.utils.get(guild.roles, name=role)
                 if payload.emoji.name == '💔':
                     # remove role
@@ -52,11 +52,11 @@ class Roles(commands.Cog):
         # check if bot was the poster and check the emoji
         if self.bot.user.id == message.author.id and (payload.emoji.name == '❤️' or payload.emoji.name == '💔'):
             # get role
-            role = message.content[message.content.find('@') + 1: message.content.find(' ', message.content.find('@'))]
+            role = message.content[message.content.find('@') + 1: message.content.find('*', message.content.find('@'))]
             if role != message.content and role != "":
                 # if correct emoji was found and also role exists in message
                 guild = self.bot.get_guild(payload.guild_id)
-                author = guild.get_member(payload.member.id)
+                author = guild.get_member(payload.user_id)
                 role = discord.utils.get(guild.roles, name=role)
                 # remove role
                 await author.remove_roles(role)
