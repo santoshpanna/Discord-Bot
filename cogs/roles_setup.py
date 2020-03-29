@@ -157,12 +157,11 @@ class Roles(commands.Cog):
             try:
                 guild = ctx.guild
                 # update category with new permissions
-                try:
-                    await ctx.channel.category.set_permissions(guild.default_role, **dict(discord.Permissions.none()))
-                    await ctx.channel.category.set_permissions(role, read_messages=True,  send_messages=True)
-                    await ctx.channel.category.set_permissions(mod_role, read_messages=True,  send_messages=True)
-                except:
-                    pass
+                await ctx.channel.category.set_permissions(guild.default_role, **dict(discord.Permissions.none()))
+                await ctx.channel.category.set_permissions(role, read_messages=True,  send_messages=True)
+                await ctx.channel.category.set_permissions(mod_role, read_messages=True,  send_messages=True)
+                for channel in ctx.channel.category.channels:
+                    await channel.edit(mod_role, read_messages=True, send_messages=True)
 
                 # post a log in log channel
                 if logChannel:
