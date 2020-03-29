@@ -47,7 +47,7 @@ class Headphonezone:
                             minm = price
                     except KeyError:
                         pass
-                    
+
         return currency, int(price) if price else price, title
 
     def getPrice(self, url):
@@ -82,6 +82,7 @@ class Headphonezone:
             # get member, mapping and service
             #url = self.cleanURL(url)
             member = self.db.getMember(ctx)
+            
             deals_by_member = self.db.getPriceAlert(ctx.author.id)
 
             service = self.db.getService('headphonezone')
@@ -127,6 +128,7 @@ class Headphonezone:
                         else:
                             data['title'] = price['title']
                             data['currency'] = price['currency']
+                            
                         status = self.db.insertPriceAlert(data)
 
                         if status == common.STATUS.SUCCESS:
@@ -136,3 +138,4 @@ class Headphonezone:
                         else:
                             await ctx.send(f'{ctx.author.name} - due to technical error we cannot track price right now.')
                             await bot.get_channel(self.masterLog).send(f'**error flipkart price insert** url = {url}, author = {ctx.author.id}, {ctx.author.name} from {ctx.guild.name} in {ctx.channel.name}')
+

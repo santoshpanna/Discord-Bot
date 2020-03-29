@@ -71,6 +71,7 @@ class Flipkart:
             # get member, mapping and service
             url = self.cleanURL(url)
             member = self.db.getMember(ctx)
+            
             deals_by_member = self.db.getPriceAlert(ctx.author.id)
 
             service = self.db.getService('flipkart')
@@ -94,7 +95,7 @@ class Flipkart:
                     if alert_price.endswith('%'):
                         if price:
                             alert_price = alert_price.remove("%", "").remove(" ", "")
-                            alertAt = price['regular'] - ((price['regular'] / 100) * int(alert_price))
+                            alertAt = price['regular'] - (price['regular'] / 100) * int(alert_price)
                             alertAt = int(alertAt)
                     elif alert_price.isnumeric():
                         alertAt = int(alert_price)
@@ -116,6 +117,7 @@ class Flipkart:
                         else:
                             data['title'] = price['title']
                             data['currency'] = price['currency']
+                            
                         status = self.db.insertPriceAlert(data)
 
                         if status == common.STATUS.SUCCESS:
@@ -125,3 +127,4 @@ class Flipkart:
                         else:
                             await ctx.send(f'{ctx.author.name} - due to technical error we cannot track price right now.')
                             await bot.get_channel(self.masterLog).send(f'**error flipkart price insert** url = {url}, author = {ctx.author.id}, {ctx.author.name} from {ctx.guild.name} in {ctx.channel.name}')
+

@@ -137,6 +137,7 @@ class GameDeals:
                             existingDeal = db.getGameDeal(post)
                             new_price = self.ssf.getPrice(url=post['url'])
                             new_price = new_price['final'] if new_price else 9223372036854775806
+                                                         
                             if 'price' in existingDeal:
                                 old_price = existingDeal['price']
                                 # if new price is less than older price post the deal

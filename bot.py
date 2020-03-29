@@ -31,6 +31,7 @@ modules_dev = [
     'cogs.moderation_setup',
     'cogs.services_setup',
     'cogs.roles_setup'
+    'cogs.send_setup'
 ]
 
 
