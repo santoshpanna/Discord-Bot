@@ -174,7 +174,7 @@ class Roles(commands.Cog):
                 except Exception:
                     pass
                 # add a new message to roles channel so that users can react and subscribe to roles
-                # await self.bot.get_channel(rolesChannel['channel_id']).send(f'To subscribe to @{name} react with :heart:, to un-subscribe react with :broken_heart:. **{name}** give you access to {message}.')
+                await self.bot.get_channel(rolesChannel['channel_id']).send(f'To subscribe to @{name} react with :heart:, to un-subscribe react with :broken_heart:. **{name}** give you access to {message}.')
             except Exception as e:
                 await ctx.send(f'Unable to change permission due to access rights.')
         else:
