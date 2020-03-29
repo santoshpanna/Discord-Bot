@@ -161,7 +161,7 @@ class Roles(commands.Cog):
                 await ctx.channel.category.set_permissions(role, read_messages=True,  send_messages=True)
                 await ctx.channel.category.set_permissions(mod_role, read_messages=True,  send_messages=True)
                 for channel in ctx.channel.category.channels:
-                    await channel.edit(mod_role, read_messages=True, send_messages=True)
+                    await channel.edit(sync_permissions=True)
 
                 # post a log in log channel
                 if logChannel:
