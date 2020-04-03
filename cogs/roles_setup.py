@@ -81,9 +81,9 @@ class Roles(commands.Cog):
 
         if not mod_role:
             # create new role
-            await ctx.guild.create_role(name=mod_role)
+            await ctx.guild.create_role(name='Moderators')
             # get the new role
-            mod_role = discord.utils.get(ctx.guild.roles, name=mod_role)
+            mod_role = discord.utils.get(ctx.guild.roles, name='Moderators')
             if logChannel:
                 await self.bot.get_channel(logChannel['channel_id']).send(f'**Role created** : **{self.bot.user.name}** created role **{mod_role}**.')
 
@@ -138,9 +138,9 @@ class Roles(commands.Cog):
 
         if not mod_role:
             # create new role
-            await ctx.guild.create_role(name=mod_role)
+            await ctx.guild.create_role(name='Moderators')
             # get the new role
-            mod_role = discord.utils.get(ctx.guild.roles, name=mod_role)
+            mod_role = discord.utils.get(ctx.guild.roles, name='Moderators')
             if logChannel:
                 await self.bot.get_channel(logChannel['channel_id']).send(f'**Role created** : **{self.bot.user.name}** created role **{mod_role}**.')
 

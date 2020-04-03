@@ -86,8 +86,9 @@ class CrackWatch:
 
         # go through new submissions
         for i in range(len(posts)):
-            if not posts[i]['flair'] and common.getEnvironment() == 'dev':
-                await bot.get_channel(masterLogger).send(f"**Error in CW [no flair]** : check {posts[i]['url']}.")
+            if not posts[i]['flair']:
+                if common.getEnvironment() == 'dev':
+                    await bot.get_channel(masterLogger).send(f"**Error in CW [no flair]** : check {posts[i]['url']}.")
             else:
                 if 'release' in posts[i]['flair'].lower():
                     posts[i]['type'] = 'crack'
@@ -164,9 +165,9 @@ class CrackWatch:
 
                         # sleep for 1 second
                         await asyncio.sleep(1)
+
                 if status == common.STATUS.FAIL.UPDATE or status == common.STATUS.FAIL.INSERT:
                     await bot.get_channel(masterLogger).send(f"**DB Error - crackwatch**: Failed Updated/Insert for id = {posts[i]['id']}.")
-
 
         # update database
         data = {}

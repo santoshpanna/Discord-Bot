@@ -30,66 +30,71 @@ class DestinyUpdates:
         soup = BeautifulSoup(req.content, 'html5lib')
 
         # post container:
-        container = soup.find('div', attrs = {'id':'explore-contents'})
+        try:
+            container = soup.find('div', attrs = {'id':'explore-contents'})
 
-        # iterating though each post
-        i = 0
-        for post in container.findAll('a'):
-            # check for max 5 updates
-            i = i + 1
-            if i >= 4:
-                break
+            # iterating though each post
+            i = 0
+            for post in container.findAll('a'):
+                # check for max 5 updates
+                i = i + 1
+                if i >= 4:
+                    break
 
-            posts = {}
-            posts['link'] = post.get('href')
-            posts['title'] = post.find('div', {"class":"title"}).text
+                posts = {}
+                posts['link'] = post.get('href')
+                posts['title'] = post.find('div', {"class":"title"}).text
 
-            # addition request for date and patchnotes
-            detail_req = requests.get('https://www.bungie.net/'+posts['link'])
-            detail_soup = BeautifulSoup(detail_req.content, 'html5lib')
+                # addition request for date and patchnotes
+                detail_req = requests.get('https://www.bungie.net/'+posts['link'])
+                detail_soup = BeautifulSoup(detail_req.content, 'html5lib')
 
-            # beautify date
-            posts['date'] = detail_soup.select("div.metadata")[0].text
-            posts['date'] = posts['date'].split("-")[0].strip()
-            
-            try:
-                # the date is older than 1 day
-                posts['date'] = str(datetime.strptime(posts['date'], "%b %d, %Y"))[:-9]
-            except Exception:
-                # convert relative hours to date
-                posts['date'] = posts['date'].replace("h", "")
-                delta = timedelta(hours=int(posts['date']))
-                posts['date'] = str(datetime.strftime((datetime.today() - delta), "%b %d, %Y"))
-                posts['date'] = str(datetime.strptime(posts['date'], "%b %d, %Y"))[:-9]
+                # beautify date
+                posts['date'] = detail_soup.select("div.metadata")[0].text
+                posts['date'] = posts['date'].split("-")[0].strip()
+                
+                try:
+                    # the date is older than 1 day
+                    posts['date'] = str(datetime.strptime(posts['date'], "%b %d, %Y"))[:-9]
+                except Exception:
+                    # convert relative hours to date
+                    posts['date'] = posts['date'].replace("h", "")
+                    delta = timedelta(hours=int(posts['date']))
+                    posts['date'] = str(datetime.strftime((datetime.today() - delta), "%b %d, %Y"))
+                    posts['date'] = str(datetime.strptime(posts['date'], "%b %d, %Y"))[:-9]
 
-            posts['patchnotes'] = str(detail_soup.find("div", attrs={"class":"content text-content"}))
+                posts['patchnotes'] = str(detail_soup.find("div", attrs={"class":"content text-content"}))
 
-            # removing tags
-            posts['patchnotes'] = posts['patchnotes'].replace("\t","").replace("\n","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<div class=\"content text-content\">","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<h2>","\n").replace("</h2>","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<h3>","\n").replace("</h3>","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<div>","\n").replace("</div>","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<ul>","").replace("</ul>","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<li>","- ").replace("</li>","\n")
-            posts['patchnotes'] = posts['patchnotes'].replace("<b>","").replace("</b>","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<u>","").replace("</u>","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<br/><br/>","\n").replace("<br/>","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<hr/>","")
-            posts['patchnotes'] = posts['patchnotes'].replace("<p"," <p")
+                # removing tags
+                posts['patchnotes'] = posts['patchnotes'].replace("\t","").replace("\n","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<div class=\"content text-content\">","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<h2>","\n").replace("</h2>","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<h3>","\n").replace("</h3>","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<div>","\n").replace("</div>","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<ul>","").replace("</ul>","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<li>","- ").replace("</li>","\n")
+                posts['patchnotes'] = posts['patchnotes'].replace("<b>","").replace("</b>","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<u>","").replace("</u>","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<br/><br/>","\n").replace("<br/>","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<hr/>","")
+                posts['patchnotes'] = posts['patchnotes'].replace("<p"," <p")
 
-            posts['patchnotes'] = w3lib.html.remove_tags(posts['patchnotes'])
+                posts['patchnotes'] = w3lib.html.remove_tags(posts['patchnotes'])
 
-            posts['id'] = posts['date']
-            posts['service_name'] = 'destinyupdates'
-            posts['service_id'] = str(service['_id'])
-            status = db.upsertPatchnotes(posts)
-            if status == common.STATUS.INSERTED:
-                updates.append(posts)
-            elif status == common.STATUS.REDUNDANT:
-                break
-            else:
-                await bot.get_channel(masterLogger).send(f"**Scrape Error - Destiny 2 Updates**: id = {posts['id']}.")
+                posts['id'] = posts['date']
+                posts['service_name'] = 'destinyupdates'
+                posts['service_id'] = str(service['_id'])
+                status = db.upsertPatchnotes(posts)
+                if status == common.STATUS.INSERTED:
+                    updates.append(posts)
+                elif status == common.STATUS.REDUNDANT:
+                    break
+                else:
+                    await bot.get_channel(masterLogger).send(f"**Scrape Error - Destiny 2 Updates**: id = {posts['id']}.")
+        except AttributeError:
+            await bot.get_channel(masterLogger).send(f"**Scrape Error - Destiny 2 Updates**")
+        except KeyError:
+            await bot.get_channel(masterLogger).send(f"**Scrape Error - Destiny 2 Updates**")
 
         # returns list in ascending order
         for update in updates[::-1]:

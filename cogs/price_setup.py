@@ -230,6 +230,5 @@ class Reddit(commands.Cog):
                 if status == common.STATUS.FAIL.UPDATE:
                     await self.bot.get_channel(self.masterLogger).send(f"**Error - Price Alert** : Bulk update error for url = {key} and price = {price['current']}.")
 
-
 def setup(bot):
     bot.add_cog(Reddit(bot))
