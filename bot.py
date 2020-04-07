@@ -36,17 +36,20 @@ modules_dev = [
 
 
 @bot.event
+async def on_connect():
+    db = database.Database()
+
+    # update bot start time
+    db.updateBotStartTime()
+
+
+@bot.event
 async def on_ready():
     # if env is not dev the load regular cogs
     if common.getEnvironment() != 'dev':
-        db = database.Database()
-
-        # update bot start time
-        db.updateBotStartTime()
-
-        # guild
-        for guilds in bot.guilds:
-            guild.updateGuidInfo(guilds)
+        # # guild
+        # for guilds in bot.guilds:
+        #     guild.updateGuidInfo(guilds)
 
         for module in modules_prod:
             bot.load_extension(module)
