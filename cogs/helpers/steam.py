@@ -47,8 +47,9 @@ class Steam:
                     for item in items:
                         description = description + "[{}]({})".format(item["name"], item['app_link'])
 
+
             # discord embed description limit
-            if len(description) >= 2048:
+            if description and len(description) >= 2048:
                 description = description[:2040]+"\n..."
 
             # initial embed

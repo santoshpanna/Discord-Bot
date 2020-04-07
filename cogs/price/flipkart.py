@@ -37,7 +37,7 @@ class Flipkart:
                 currency = u"\u20B9"
                 price = data['pricing']['finalPrice']['value']
                 title = data['titles']['title']
-            except KeyError:
+            except (KeyError, TypeError, KeyError):
                 pass
 
         return currency, int(price) if price else price, title
