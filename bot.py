@@ -11,18 +11,19 @@ bot = commands.Bot(command_prefix=config['DISCORD']['prefix'])
 formatter = commands.HelpCommand(show_check_failure=False)
 
 modules_prod = [
-    'cogs.status_setup',
-    'cogs.core_setup',
-    'cogs.moderation_setup',
-    'cogs.csgo_setup',
-    'cogs.scrape_setup',
-    'cogs.reddit_setup',
-    'cogs.services_setup',
-    'cogs.fun_setup',
-    'cogs.price_setup',
-    'cogs.cleaner_setup',
-    'cogs.send_setup',
-    'cogs.roles_setup'
+    'cogs.youtube_setup',
+    'cogs.core_setup'
+    #'cogs.status_setup',
+    #'cogs.moderation_setup',
+    #'cogs.csgo_setup',
+    #'cogs.scrape_setup',
+    #'cogs.reddit_setup',
+    #'cogs.services_setup',
+    #'cogs.fun_setup',
+    #'cogs.price_setup',
+    #'cogs.cleaner_setup',
+    #'cogs.send_setup',
+    #'cogs.roles_setup'
 ]
 
 modules_dev = [

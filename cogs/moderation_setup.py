@@ -3,6 +3,7 @@ from common import common
 from .helpers import guild
 from .helpers.helpmaker import Help
 
+
 class Moderation(commands.Cog):
     bot = None
 
@@ -12,7 +13,8 @@ class Moderation(commands.Cog):
         self.groupedCommands = {}
         self.groupedCommands['remove'] = {'name': 'remove', 'description': 'helps in mass removal.'}
         self.groupedCommands['remove']['subcommand'] = {}
-        self.groupedCommands['remove']['subcommand']['message'] = {'name': 'remove', 'arguments': 'number', 'description': 'remove <number> messages.'}
+        self.groupedCommands['remove']['subcommand']['message'] = {'name': 'remove', 'arguments': 'number',
+                                                                   'description': 'remove <number> messages.'}
         self.help = Help()
 
     @commands.group(pass_context=True)
@@ -32,8 +34,8 @@ class Moderation(commands.Cog):
 
     @remove.command()
     @commands.has_permissions(manage_messages=True)
-    async def message(self, ctx, number:int):
-        if number > 50:
+    async def message(self, ctx, number: int):
+        if number > 10000:
             await ctx.send('Max number of message removal supported = 50.')
 
         async for message in self.bot.get_channel(ctx.message.channel.id).history(limit=number):

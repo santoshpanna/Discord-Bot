@@ -1,7 +1,7 @@
 import time
 from . import common
 from datetime import datetime
-from pymongo import MongoClient, ASCENDING, errors
+from pymongo import MongoClient, ASCENDING, errors, DESCENDING
 from _datetime import timedelta
 
 # TODO
@@ -329,3 +329,12 @@ class Database:
             status = self.db.patchnotes.insert_one(data).acknowledged
             return self.STATUS.SUCCESS.INSERTED if status else self.STATUS.FAIL.INSERT
     ''' Patch Notes End '''
+
+
+    ''' Youtube '''
+    def setYoutube(self, data):
+        return self.db.youtube.insert_one(data).acknowledged
+
+    def getYoutube(self, data):
+        if data == 'live':
+           return self.db.youtube.find_one(sort=[('_id', DESCENDING)])
