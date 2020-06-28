@@ -133,7 +133,7 @@ class Youtube(commands.Cog):
     async def ytlive(self, ctx):
         if ctx.invoked_subcommand is None:
             # check the status of job
-            if self.checkLive.is_running():
+            if self.checkLive.get_task():
                 await ctx.send(f"Job is already running ignoring this request.")
             else:
                 # start the jobs
