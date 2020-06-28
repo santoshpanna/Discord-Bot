@@ -39,7 +39,7 @@ class Youtube(commands.Cog):
 
             # stop the job
             # TODO - check impact of cancel vs stop
-            self.checkLive.cancel()
+            self.checkLive.stop()
 
         if data and 'items' in data:
             # get the discord channel
@@ -55,7 +55,7 @@ class Youtube(commands.Cog):
 
                         # stop the job
                         # TODO - check impact of cancel vs stop
-                        self.checkLive.cancel()
+                        self.checkLive.stop()
             else:
                 # the cache does not exist, the app restarted or initial start
                 if not self.cache['live']:
@@ -106,7 +106,10 @@ class Youtube(commands.Cog):
 
                         # stop the job
                         # TODO - check impact of cancel vs stop
-                        self.checkLive.cancel()
+                        self.checkLive.stop()
+                        
+        # TODO - check impact of cancel vs stop
+        self.checkLive.stop()
 
     def checkUploads(self):
         # get the api key and channel id
