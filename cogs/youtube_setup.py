@@ -18,6 +18,7 @@ class Youtube(commands.Cog):
         self.db = Database()
         self.config = common.getConfig()
         self.cache = {'live': None, 'videos': None}
+        self.masterLogger = common.getMasterLog()
 
     @tasks.loop(minutes=1, count=10)
     async def checkLive(self):
@@ -39,7 +40,7 @@ class Youtube(commands.Cog):
 
             # stop the job
             # TODO - check impact of cancel vs stop
-            self.checkLive.stop()
+            self.checkLive.cancel()
 
         if data and 'items' in data:
             # get the discord channel
@@ -54,8 +55,9 @@ class Youtube(commands.Cog):
                         await channel.edit(name='live-streams')
 
                         # stop the job
+                        await self.bot.get_channel(self.masterLogger).send(f'**YTLive** : Changed status, cancelling')
                         # TODO - check impact of cancel vs stop
-                        self.checkLive.stop()
+                        self.checkLive.cancel()
             else:
                 # the cache does not exist, the app restarted or initial start
                 if not self.cache['live']:
@@ -105,11 +107,14 @@ class Youtube(commands.Cog):
                         await channel.edit(name='🟢we-are-live')
 
                         # stop the job
+                        await self.bot.get_channel(self.masterLogger).send(f'**YTLive** : Changed Status, cancelling job')
                         # TODO - check impact of cancel vs stop
-                        self.checkLive.stop()
-                        
+                        self.checkLive.cancel()
+        else:
+            await self.bot.get_channel(self.masterLogger).send(f'**YTLive** : Empty data, cancelling job.')
+            self.checkLive.stop()
         # TODO - check impact of cancel vs stop
-        self.checkLive.stop()
+        # self.checkLive.stop()
 
     def checkUploads(self):
         # get the api key and channel id
@@ -137,10 +142,14 @@ class Youtube(commands.Cog):
         if ctx.invoked_subcommand is None:
             # check the status of job
             if self.checkLive.get_task():
-                await ctx.send(f"Job is already running ignoring this request.")
+                await self.bot.get_channel(self.masterLogger).send(f'**YTLive** : Restarting job')
+                self.checkLive.cancel()
+                self.checkLive.start()
             else:
                 # start the jobs
+                await self.bot.get_channel(self.masterLogger).send(f'**YTLive** : Started Job')
                 self.checkLive.start()
+
 
 
 def setup(bot):
